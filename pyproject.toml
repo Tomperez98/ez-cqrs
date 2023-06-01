@@ -64,6 +64,7 @@ exclude = [
 known-first-party = ["ez_cqrs"]
 force-wrap-aliases = true
 combine-as-imports = true
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"

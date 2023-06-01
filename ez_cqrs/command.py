@@ -1,4 +1,5 @@
 """Command base class."""
+from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass
