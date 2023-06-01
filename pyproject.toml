@@ -12,7 +12,7 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 authors = [
-    { name = "author", email = "author-email"}
+    { name = "Tomas Perez Alvarez", email = "tomasperezalvarez@gmail.com"}
 ]
 dependencies = [
     
