@@ -8,3 +8,9 @@
 --trusted-host pypi.org
 --trusted-host files.pythonhosted.org
 
+mashumaro==3.7
+    # via ez_cqrs (pyproject.toml)
+result==0.10.0
+    # via ez_cqrs (pyproject.toml)
+typing-extensions==4.6.2
+    # via mashumaro

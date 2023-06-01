@@ -15,7 +15,8 @@ authors = [
     { name = "Tomas Perez Alvarez", email = "tomasperezalvarez@gmail.com"}
 ]
 dependencies = [
-    
+    "mashumaro",
+    "result"
 ]
 
 [project.optional-dependencies]
