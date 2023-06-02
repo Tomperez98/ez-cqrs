@@ -3,12 +3,16 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from mashumaro import DataClassDictMixin
-from result import Result
 
-from ez_cqrs.command import Command
-from ez_cqrs.events import DomainEvent
+if TYPE_CHECKING:
+    from result import Result
+
+    from ez_cqrs.command import Command
+    from ez_cqrs.events import DomainEvent
+    from ez_cqrs.services import Services
 
 
 @dataclass(frozen=False)
@@ -33,7 +37,11 @@ class Aggregate(ABC, DataClassDictMixin):
         """  # noqa: E501
 
     @abstractmethod
-    async def handle(self, command: Command) -> Result[list[DomainEvent], Exception]:
+    async def handle(
+        self,
+        command: Command,
+        services: Services | None,
+    ) -> Result[list[DomainEvent], Exception]:
         """
         Consume and process commands.
 
