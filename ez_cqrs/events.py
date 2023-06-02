@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Generic, TypeVar
 
 from mashumaro import DataClassDictMixin
 
@@ -26,3 +27,16 @@ class DomainEvent(ABC, DataClassDictMixin):
     @abstractmethod
     def event_version(self) -> str:
         """A version of the `event_type`, used for event upcasting."""
+
+
+E = TypeVar("E", bound=DomainEvent)
+
+
+@dataclass(frozen=True)
+class EventEnvelope(Generic[E]):
+    """Data structure that encapsulates an event with its persistent information."""
+
+    aggregate_id: str
+    sequence: int
+    payload: E
+    metadata: dict[str, str]
