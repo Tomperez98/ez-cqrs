@@ -18,15 +18,13 @@ class DomainEvent(ABC, DataClassDictMixin):
     is used they are the single source of truth.
     """
 
-    @property
     @abstractmethod
     def event_type(self) -> str:
-        """A name specifying the event, used for event upcasting."""
+        """Event name, used for event upcasting."""
 
-    @property
     @abstractmethod
     def event_version(self) -> str:
-        """A version of the `event_type`, used for event upcasting."""
+        """Event type version, used for event upcasting."""
 
 
 E = TypeVar("E", bound=DomainEvent)

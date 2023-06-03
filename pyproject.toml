@@ -21,7 +21,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pyrgo"
+    "pyrgo",
+    "pytest-cov"
 ]
 
 [tool.ruff]
@@ -83,6 +84,10 @@ xfail_strict = true
 addopts = [
     "--import-mode=importlib",
     "--strict-markers",
+    "--cov-config=pyproject.toml",
+    "--cov-fail-under=20",
+    "--cov=ez_cqrs",
+    "--cov-report=term-missing:skip-covered",
 ]
 markers = [
     "integration: mark integration tests.",

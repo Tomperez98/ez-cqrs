@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from ez_cqrs.events import DomainEvent
+from ez_cqrs.event import DomainEvent
 
 
 @pytest.mark.unit()
@@ -14,11 +14,9 @@ def test_event_definition() -> None:
 
     @dataclass(frozen=True)
     class DomainEventCreated(DomainEvent):
-        @property
         def event_type(self) -> str:
             return "DomainEventCreated"
 
-        @property
         def event_version(self) -> str:
             return "1.0"
 

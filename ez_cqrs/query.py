@@ -4,7 +4,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Generic
 
-from ez_cqrs.events import E, EventEnvelope
+from ez_cqrs.event import E, EventEnvelope
 
 
 class Query(ABC, Generic[E]):

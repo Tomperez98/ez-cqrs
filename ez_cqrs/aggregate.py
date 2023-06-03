@@ -3,16 +3,38 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from mashumaro import DataClassDictMixin
 
 if TYPE_CHECKING:
     from result import Result
 
-    from ez_cqrs.command import Command
-    from ez_cqrs.events import DomainEvent
-    from ez_cqrs.services import Services
+    from ez_cqrs.event import DomainEvent
+
+
+@dataclass(frozen=True)
+class Command(ABC, DataClassDictMixin):
+    """
+    Command base class.
+
+    In order to make changes to our system we'll need commands.
+    These are the simplest components of any CQRS system and consist
+    of little more than packaged data.
+
+    When designing commands an easy mental model to use is that of an
+    HTTP API. Each virtual endpoint would receive just the data needed to
+    operate that function.
+    """
+
+
+class Services:
+    """
+    Services base class.
+
+    Business logic doesn't exist in a vacuum and external services
+    may be needed for a variety of reasons.
+    """
 
 
 @dataclass(frozen=False)
@@ -27,20 +49,19 @@ class Aggregate(ABC, DataClassDictMixin):
     associated with it.
     """  # noqa: E501
 
-    @property
     @abstractmethod
     def aggregate_type(self) -> str:
         """
-        The aggregate type is used as the unique indetifier for this aggregate and its events.
+        Uused as the unique indetifier for this aggregate and its events.
 
         This is used for persisting the events and snapshots to a database.
-        """  # noqa: E501
+        """
 
     @abstractmethod
     async def handle(
         self,
         command: Command,
-        services: Services | None,
+        services: Services,
     ) -> Result[list[DomainEvent], Exception]:
         """
         Consume and process commands.
@@ -70,3 +91,6 @@ class Aggregate(ABC, DataClassDictMixin):
         _No business logic should be placed here_, this is only used for updating the
         aggregate state.
         """
+
+
+A = TypeVar("A", bound=Aggregate)
