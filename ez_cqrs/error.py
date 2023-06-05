@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+from typing import Union
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -65,10 +66,10 @@ class UnexpectedError(Exception):
         super().__init__()
 
 
-AggregateError: TypeAlias = (
-    UserError
-    | AggregateConflictError
-    | DatabaseConnectionError
-    | DeserializationError
-    | UnexpectedError
-)
+AggregateError: TypeAlias = Union[
+    UserError,
+    AggregateConflictError,
+    DatabaseConnectionError,
+    DeserializationError,
+    UnexpectedError,
+]

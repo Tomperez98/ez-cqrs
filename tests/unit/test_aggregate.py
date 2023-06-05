@@ -1,10 +1,17 @@
 """Test commands."""
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
-from typing import Any, TypeAlias
+from typing import Any, List, Union
 
 import pytest
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
 from typing_extensions import assert_never
 
 from ez_cqrs.aggregate import Command
@@ -26,10 +33,10 @@ class Walk(Command):
 class ListNames(Command):
     """List names command."""
 
-    names: list[str]
+    names: List[str]  # noqa: UP006
 
 
-SampleCommands: TypeAlias = Greet | Walk | ListNames
+SampleCommands: TypeAlias = Union[Greet, Walk, ListNames]
 
 
 @pytest.mark.unit()
@@ -42,7 +49,7 @@ SampleCommands: TypeAlias = Greet | Walk | ListNames
 )
 def test_exhaustive_checking(command: SampleCommands) -> None:
     """Test exhaustive checking works on commands."""
-    if isinstance(command, Walk | Greet | ListNames):
+    if isinstance(command, (Walk, Greet, ListNames)):
         assert True
     else:
         assert_never(command)
