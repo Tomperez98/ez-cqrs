@@ -1,13 +1,16 @@
-"""Query and view base class."""
+"""Query related definition."""
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Generic
+import abc
+from typing import TYPE_CHECKING, Generic
 
-from ez_cqrs.event import E, EventEnvelope
+from ez_cqrs.aggregate import E
+
+if TYPE_CHECKING:
+    from ez_cqrs.event import EventEnvelope
 
 
-class Query(ABC, Generic[E]):
+class Query(abc.ABC, Generic[E]):
     """
     Queries read events as they are committed and provide insight into the system state.
 
@@ -20,12 +23,12 @@ class Query(ABC, Generic[E]):
     - trigger a command on another aggregate
     """
 
-    @abstractmethod
-    async def dispatch(self, aggregate_id: str, events: list[EventEnvelope[E]]) -> None:
+    @abc.abstractmethod
+    async def dispatch(self, events: list[EventEnvelope[E]]) -> None:
         """Event will be dispatched here immediately after being committed."""
 
 
-class View(ABC, Generic[E]):
+class View(abc.ABC, Generic[E]):
     """
     A `View` represents a materialized view.
 
@@ -34,7 +37,7 @@ class View(ABC, Generic[E]):
     This is a read element in a CQRS system.
     """
 
-    @abstractmethod
+    @abc.abstractmethod
     def update(self, event: EventEnvelope[E]) -> None:
         """
         Each implemented view is responsible for updating its state.

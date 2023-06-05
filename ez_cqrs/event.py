@@ -1,39 +1,30 @@
-"""Event base class."""
+"""Event related definition."""
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import Generic
 
-from mashumaro import DataClassDictMixin
-
-
-@dataclass(frozen=True)
-class DomainEvent(ABC, DataClassDictMixin):
-    """
-    Domain Event base class.
-
-    A `DomainEvent` represents any business change in the state of an `Aggregate`.
-    `DomainEvents` are inmutable, and when [event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html)
-    is used they are the single source of truth.
-    """
-
-    @abstractmethod
-    def event_type(self) -> str:
-        """Event name, used for event upcasting."""
-
-    @abstractmethod
-    def event_version(self) -> str:
-        """Event type version, used for event upcasting."""
-
-
-E = TypeVar("E", bound=DomainEvent)
+from ez_cqrs.aggregate import E
 
 
 @dataclass(frozen=True)
 class EventEnvelope(Generic[E]):
-    """Data structure that encapsulates an event with its persistent information."""
+    """
+    `EventEnvelope` is a data structure that encapsulates an event.
 
+    All of the associated that will be trasnported and persisted together and will be
+    available for queries.
+
+    Within any system an event must be unique based on the compound key composed of its:
+    - `aggregate_type`
+    - `aggregate_id`
+    - `sequence`
+
+    Thus an `EventEnvelope` provides a uniqueness value along with an event `payload`
+    and `metadata`.
+    """
+
+    aggregate_type: str
     aggregate_id: str
     sequence: int
     payload: E

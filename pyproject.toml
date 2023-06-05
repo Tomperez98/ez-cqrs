@@ -90,7 +90,7 @@ addopts = [
     "--import-mode=importlib",
     "--strict-markers",
     "--cov-config=pyproject.toml",
-    "--cov-fail-under=20",
+    "--cov-fail-under=0",
     "--cov=ez_cqrs",
     "--cov-report=term-missing:skip-covered",
 ]

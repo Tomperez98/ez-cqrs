@@ -1,44 +1,78 @@
-"""Aggregate base class."""
+"""CQRS core components."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from mashumaro import DataClassDictMixin
 
 if TYPE_CHECKING:
     from result import Result
 
-    from ez_cqrs.event import DomainEvent
-
 
 @dataclass(frozen=True)
-class Command(ABC, DataClassDictMixin):
+class Command(DataClassDictMixin):
     """
-    Command base class.
+    Command baseclass.
 
-    In order to make changes to our system we'll need commands.
-    These are the simplest components of any CQRS system and consist
-    of little more than packaged data.
-
-    When designing commands an easy mental model to use is that of an
-    HTTP API. Each virtual endpoint would receive just the data needed to
-    operate that function.
+    In order to make changes to our system we'll need commands. These
+    are the simplest components of any CQRS system and consist of little more than
+    packaged data.
     """
 
 
 class Services:
     """
-    Services base class.
+    Services baseclass.
 
-    Business logic doesn't exist in a vacuum and external services
-    may be needed for a variety of reasons.
+    Business logic doesn't exist in a vacuum and external services may be needed for
+    a variety of reasons.
     """
 
 
-@dataclass(frozen=False)
-class Aggregate(ABC, DataClassDictMixin):
+class DomainError(Exception):
+    """
+    DomainError baseclass.
+
+    These type of errors indicate violation of buisness rules.
+    """
+
+
+@dataclass(frozen=True)
+class DomainEvent(ABC, DataClassDictMixin):
+    """
+    Domain Event base class.
+
+    A `DomainEvent` represents any business change in the state of an `Aggregate`.
+    `DomainEvents` are inmutable, and when [event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html)
+    is used they are the single source of truth.
+
+    The name of a `DomainEvent` should always be in the past tense, e.g.,
+    - AdminPrivilegesGranted
+    - EmailAddressChanged
+    - DependencyAdded
+
+    To simplify serialization, an event should be an enum, and each variant should carry
+    any important information.
+    """
+
+    @abstractmethod
+    def event_type(self) -> str:
+        """Event name, used for event upcasting."""
+
+    @abstractmethod
+    def event_version(self) -> str:
+        """Event type version, used for event upcasting."""
+
+
+C = TypeVar("C", bound=Command)
+E = TypeVar("E", bound=DomainEvent)
+S = TypeVar("S", bound=Services)
+ERR = TypeVar("ERR", bound=DomainError)
+
+
+class Aggregate(Generic[C, E, ERR, S]):
     """
     Aggregate base class.
 
@@ -60,9 +94,9 @@ class Aggregate(ABC, DataClassDictMixin):
     @abstractmethod
     async def handle(
         self,
-        command: Command,
-        services: Services,
-    ) -> Result[list[DomainEvent], Exception]:
+        command: C,
+        services: S,
+    ) -> Result[list[E], ERR]:
         """
         Consume and process commands.
 
@@ -73,7 +107,7 @@ class Aggregate(ABC, DataClassDictMixin):
         """
 
     @abstractmethod
-    def apply(self, event: DomainEvent) -> None:
+    def apply(self, event: E) -> None:
         """
         Update the aggregate's state once an event has been commited.
 
@@ -91,6 +125,3 @@ class Aggregate(ABC, DataClassDictMixin):
         _No business logic should be placed here_, this is only used for updating the
         aggregate state.
         """
-
-
-A = TypeVar("A", bound=Aggregate)

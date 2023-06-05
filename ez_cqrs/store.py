@@ -1,53 +1,53 @@
-"""Event store."""
+"""Event store definition."""
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+import abc
 from typing import TYPE_CHECKING, Generic
 
-from ez_cqrs.aggregate import A
-from ez_cqrs.event import DomainEvent, E, EventEnvelope
+from ez_cqrs.aggregate import ERR, Aggregate, C, E, S
 
 if TYPE_CHECKING:
     from result import Result
 
     from ez_cqrs.error import AggregateError
+    from ez_cqrs.event import EventEnvelope
 
 
-class AggregateContext(ABC, Generic[A]):
+class AggregateContext(Generic[C, E, ERR, S]):
     """
-    Aggegate as well as the context around it.
+    Aggregate as well as the context around it.
 
     This is used internally within the `EventStore` to persist and aggregate instance
     and events with the correct context after it has beed loaded and modified.
     """
 
-    @abstractmethod
-    def aggregate(self) -> A:
+    @abc.abstractmethod
+    def aggregate(self) -> Aggregate[C, E, ERR, S]:
         """Aggregate instance with all state loaded."""
 
 
-class EventStore(ABC, Generic[A, E]):
-    """Abstract central source for loading past events and committing new events."""
+class EventStore(Generic[C, E, ERR, S]):
+    """The abstract central source for loading past events and committing new events."""
 
-    @abstractmethod
+    @abc.abstractmethod
     async def load_events(
         self,
         aggregate_id: str,
     ) -> Result[EventEnvelope[E], AggregateError]:
-        """Load the events for a particular `aggregate_id`."""
+        """Load all events for a particular `aggregate_id`."""
 
-    @abstractmethod
+    @abc.abstractmethod
     async def load_aggregate(
         self,
         aggregate_id: str,
-    ) -> Result[AggregateContext[A], AggregateError]:
+    ) -> Result[AggregateContext[C, E, ERR, S], AggregateError]:
         """Load aggregate at current state."""
 
-    @abstractmethod
+    @abc.abstractmethod
     async def commit(
         self,
-        events: list[DomainEvent],
-        context: AggregateContext[A],
+        events: list[E],
+        context: AggregateContext[C, E, ERR, S],
         metadata: dict[str, str],
     ) -> Result[list[EventEnvelope[E]], AggregateError]:
         """Commit new events."""
