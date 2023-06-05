@@ -5,14 +5,14 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from mashumaro import DataClassDictMixin
+from mashumaro.mixins.orjson import DataClassORJSONMixin
 
 if TYPE_CHECKING:
     from result import Result
 
 
 @dataclass(frozen=True)
-class Command(DataClassDictMixin):
+class Command:
     """
     Command baseclass.
 
@@ -40,7 +40,7 @@ class DomainError(Exception):
 
 
 @dataclass(frozen=True)
-class DomainEvent(ABC, DataClassDictMixin):
+class DomainEvent(ABC, DataClassORJSONMixin):
     """
     Domain Event base class.
 
@@ -72,7 +72,8 @@ S = TypeVar("S", bound=Services)
 ERR = TypeVar("ERR", bound=DomainError)
 
 
-class Aggregate(Generic[C, E, ERR, S]):
+@dataclass
+class Aggregate(ABC, Generic[C, E, ERR, S]):
     """
     Aggregate base class.
 

@@ -22,7 +22,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pyrgo",
-    "pytest-cov"
+    "pytest-cov",
+    "pytest-asyncio",
 ]
 
 [project.urls]
@@ -98,6 +99,7 @@ markers = [
     "integration: mark integration tests.",
     "unit: mark unittest.",
 ]
+asyncio_mode = "auto"
 
 [tool.mypy]
 show_error_codes = true
