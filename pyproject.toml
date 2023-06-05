@@ -25,6 +25,11 @@ dev = [
     "pytest-cov"
 ]
 
+[project.urls]
+Documentation = "https://github.com/Tomperez98/ez-cqrs#readme"
+Issues = "https://github.com/Tomperez98/ez-cqrs/issues"
+Source = "https://github.com/Tomperez98/ez-cqrs"
+
 [tool.ruff]
 line-length = 88
 ignore = [
