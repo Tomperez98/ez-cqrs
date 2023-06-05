@@ -15,7 +15,7 @@ authors = [
     { name = "Tomas Perez Alvarez", email = "tomasperezalvarez@gmail.com"}
 ]
 dependencies = [
-    "mashumaro",
+    "mashumaro[orjson]",
     "result"
 ]
 

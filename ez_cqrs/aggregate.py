@@ -95,7 +95,7 @@ class Aggregate(Generic[C, E, ERR, S]):
     async def handle(
         self,
         command: C,
-        services: S,
+        services: S | None,
     ) -> Result[list[E], ERR]:
         """
         Consume and process commands.
