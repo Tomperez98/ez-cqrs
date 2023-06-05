@@ -1,7 +1,12 @@
 """Error base class."""
 from __future__ import annotations
 
-from typing import TypeAlias
+import sys
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias  # noqa: TCH002
 
 
 class UserError(Exception):
