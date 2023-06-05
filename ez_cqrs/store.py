@@ -22,7 +22,7 @@ class AggregateContext(ABC, Generic[A]):
     """
 
     @abstractmethod
-    def aggegate(self) -> A:
+    def aggregate(self) -> A:
         """Aggregate instance with all state loaded."""
 
 
