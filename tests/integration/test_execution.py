@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Union
 
 import pydantic
 import pytest
@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from result import Err, Ok, Result
 
 from ez_cqrs import ops
+from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import Command, CommandValidator, DomainEvent
 from ez_cqrs.handler import CommandHandler
 
@@ -79,7 +80,9 @@ class BankAccountCommandHandler(  # noqa: D101
     async def handle(  # noqa: D102
         self,
         command: BankAccountCommand,
+        ops_registry: OpsRegistry[Any],
     ) -> Result[list[BankAccountEvent], ExecutionError]:
+        _ = ops_registry
         if isinstance(command, OpenAccount):
             return Ok(
                 [AccountOpened(account_id=command.account_id, amount=command.amount)],
@@ -129,7 +132,10 @@ class TestCommandHanlder:  # noqa: D101
     ) -> None:
         """Test handle method."""
         cmd_handler = BankAccountCommandHandler()
-        resultant_events = await cmd_handler.handle(command=command)
+        resultant_events = await cmd_handler.handle(
+            command=command,
+            ops_registry=OpsRegistry[Any](max_lenght=0),
+        )
         assert resultant_events.unwrap() == expected_events
 
 
@@ -155,5 +161,6 @@ async def test_validate_and_execute_cmd(
         cmd_handler=cmd_handler,
         command=cmd,
         schema=validator,
+        max_transactions=0,
     )
     assert resultant_events.unwrap() == expected_events

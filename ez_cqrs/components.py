@@ -1,7 +1,7 @@
 """CQRS core components."""
 from __future__ import annotations
 
-from abc import ABC
+import abc
 from dataclasses import dataclass
 from typing import TypeVar
 
@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 
 @dataclass(frozen=True)
-class Command(DataClassDictMixin):
+class Command(abc.ABC, DataClassDictMixin):
     """
     Command baseclass.
 
@@ -21,7 +21,7 @@ class Command(DataClassDictMixin):
     """
 
 
-class CommandValidator(BaseModel):
+class CommandValidator(abc.ABC, BaseModel):
     """Command input validator."""
 
     class Config:
@@ -31,7 +31,7 @@ class CommandValidator(BaseModel):
 
 
 @dataclass(frozen=True)
-class DomainEvent(ABC, DataClassORJSONMixin):
+class DomainEvent(abc.ABC, DataClassORJSONMixin):
     """
     Domain Event base class.
 
