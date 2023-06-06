@@ -1,10 +1,16 @@
 """Testing framework."""
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Generic
 
 from result import Ok, Result
+
+if sys.version_info >= (3, 8):
+    from typing import final
+else:
+    from typing_extensions import final
 
 from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import C, E, V
@@ -19,6 +25,7 @@ if TYPE_CHECKING:
 NO_RESULT_MSG = "No result to evaluate."
 
 
+@final
 @dataclass()
 class Framework(Generic[C, E, V]):
     """Testing framework."""
