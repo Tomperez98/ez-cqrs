@@ -12,9 +12,12 @@ mashumaro[orjson]==3.7
     # via ez_cqrs (pyproject.toml)
 orjson==3.9.0
     # via mashumaro
+pydantic==1.10.8
+    # via ez_cqrs (pyproject.toml)
 result==0.10.0
     # via ez_cqrs (pyproject.toml)
 typing-extensions==4.6.2
     # via
     #   mashumaro
+    #   pydantic
     #   result

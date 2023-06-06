@@ -16,7 +16,8 @@ authors = [
 ]
 dependencies = [
     "mashumaro[orjson]",
-    "result"
+    "result",
+    "pydantic"
 ]
 
 [project.optional-dependencies]
@@ -100,6 +101,17 @@ markers = [
     "unit: mark unittest.",
 ]
 asyncio_mode = "auto"
+
+[tool.coverage.report]
+precision = 1
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "@overload",
+  "raise NotImplementedError"
+]
+
 
 [tool.mypy]
 show_error_codes = true
