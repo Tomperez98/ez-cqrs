@@ -1,3 +1,3 @@
 # ez-cqrs
 
-A lightweight, opinionated CQRS and event sourcing framework.
+A lightweight, opinionated framework to write software in a procedural way.

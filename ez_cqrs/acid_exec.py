@@ -2,8 +2,14 @@
 from __future__ import annotations
 
 import abc
+import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
+
+if sys.version_info >= (3, 8):
+    from typing import final
+else:
+    from typing_extensions import final
 
 if TYPE_CHECKING:
     from result import Result
@@ -14,6 +20,7 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
+@final
 @dataclass
 class OpsRegistry(Generic[T]):
     """
