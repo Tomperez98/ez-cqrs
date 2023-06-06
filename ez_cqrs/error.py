@@ -1,6 +1,7 @@
 """Error base class."""
 from __future__ import annotations
 
+import abc
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
         from typing_extensions import TypeAlias
 
 
-class DomainError(Exception):
+class DomainError(abc.ABC, Exception):
     """
     Raised when a user violates a business rule.
 
@@ -21,6 +22,13 @@ class DomainError(Exception):
 
     This translates into a `Bad Request` status.
     """
+
+
+class DatabaseError(Exception):
+    """Raised whwne that's an error interacting with system's database."""
+
+    def __init__(self, database_error: Exception) -> None:  # noqa: D107
+        super().__init__(f"An error ocurred with database {database_error}")
 
 
 class UnexpectedError(Exception):
@@ -38,5 +46,6 @@ class UnexpectedError(Exception):
 
 ExecutionError: TypeAlias = Union[
     DomainError,
+    DatabaseError,
     UnexpectedError,
 ]
