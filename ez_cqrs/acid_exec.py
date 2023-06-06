@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from result import Result
 
     from ez_cqrs.error import DatabaseError
+
+
 T = TypeVar("T")
 
 
