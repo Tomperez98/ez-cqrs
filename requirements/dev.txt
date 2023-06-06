@@ -114,6 +114,8 @@ platformdirs==3.5.1
     # via black
 pluggy==1.0.0
     # via pytest
+pydantic==1.10.8
+    # via ez_cqrs (pyproject.toml)
 pygments==2.15.1
     # via
     #   mkdocs-material
@@ -190,6 +192,7 @@ typing-extensions==4.6.2
     #   mkdocs
     #   mypy
     #   platformdirs
+    #   pydantic
     #   pytest-asyncio
     #   result
     #   rich
