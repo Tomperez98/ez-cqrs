@@ -29,11 +29,13 @@ async def validate_and_execute_cmd(
     if not isinstance(validated, Ok):
         return Err(validated.err())
 
+    ops_registry = OpsRegistry[Any](max_lenght=max_transactions)
     resultant_events = await cmd_handler.handle(
         command=command,
-        ops_registry=OpsRegistry[Any](max_lenght=max_transactions),
+        ops_registry=ops_registry,
         config=config,
     )
     if not isinstance(resultant_events, Ok):
         return Err(resultant_events.err())
+
     return Ok(resultant_events.unwrap())

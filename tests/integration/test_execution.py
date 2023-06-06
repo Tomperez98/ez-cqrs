@@ -14,6 +14,7 @@ from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import Command, CommandValidator, DomainEvent
 from ez_cqrs.handler import CommandHandler
 from ez_cqrs.shared_state import Config
+from ez_cqrs.testing import Framework
 
 if TYPE_CHECKING:
     import sys
@@ -143,30 +144,66 @@ class TestCommandHanlder:  # noqa: D101
         )
         assert resultant_events.unwrap() == expected_events
 
-
-@pytest.mark.parametrize(
-    argnames=["cmd_handler", "cmd", "validator", "expected_events"],
-    argvalues=[
-        (
-            BankAccountCommandHandler(),
-            OpenAccount(account_id="123", amount=1),
-            OpenAccountValidator,
-            [AccountOpened(account_id="123", amount=1)],
-        ),
-    ],
-)
-async def test_validate_and_execute_cmd(
-    cmd_handler: BankAccountCommandHandler,
-    cmd: BankAccountCommand,
-    validator: type[BankAccountValidator],
-    expected_events: list[BankAccountEvent],
-) -> None:
-    """Test validate and execution cmd operation."""
-    resultant_events = await ops.validate_and_execute_cmd(
-        cmd_handler=cmd_handler,
-        command=cmd,
-        schema=validator,
-        max_transactions=0,
-        config=Config(),
+    @pytest.mark.parametrize(
+        argnames=["cmd_handler", "cmd", "validator", "expected_events"],
+        argvalues=[
+            (
+                BankAccountCommandHandler(),
+                OpenAccount(account_id="123", amount=1),
+                OpenAccountValidator,
+                [AccountOpened(account_id="123", amount=1)],
+            ),
+        ],
     )
-    assert resultant_events.unwrap() == expected_events
+    async def test_validate_and_execute_cmd(
+        self,
+        cmd_handler: BankAccountCommandHandler,
+        cmd: BankAccountCommand,
+        validator: type[BankAccountValidator],
+        expected_events: list[BankAccountEvent],
+    ) -> None:
+        """Test validate and execution cmd operation."""
+        resultant_events = await ops.validate_and_execute_cmd(
+            cmd_handler=cmd_handler,
+            command=cmd,
+            schema=validator,
+            max_transactions=0,
+            config=Config(),
+        )
+        assert resultant_events.unwrap() == expected_events
+
+    @pytest.mark.parametrize(
+        argnames=["cmd_handler", "cmd", "validator", "expected_events"],
+        argvalues=[
+            (
+                BankAccountCommandHandler(),
+                OpenAccount(account_id="123", amount=1),
+                OpenAccountValidator,
+                [AccountOpened(account_id="123", amount=1)],
+            ),
+        ],
+    )
+    async def test_with_framework(
+        self,
+        cmd_handler: BankAccountCommandHandler,
+        cmd: BankAccountCommand,
+        validator: type[BankAccountValidator],
+        expected_events: list[BankAccountEvent],
+    ) -> None:
+        """Test validate command with testing framework."""
+        framework = Framework[
+            BankAccountCommand,
+            BankAccountEvent,
+            BankAccountValidator,
+        ](
+            cmd_handler=cmd_handler,
+            cmd=cmd,
+            schema_validator=validator,
+        )
+
+        assert framework.validate().then_expect_is_valid()
+        await framework.execute(
+            max_transactions=0,
+            config=Config(),
+        )
+        assert framework.then_expect_events(expected_events=expected_events)
