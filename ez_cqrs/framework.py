@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Generic
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from result import Err, Ok, Result
 
@@ -25,6 +25,8 @@ if TYPE_CHECKING:
     from ez_cqrs.handler import CommandHandler, EventDispatcher
     from ez_cqrs.shared_state import Config
 
+T = TypeVar("T")
+
 
 @dataclass(repr=True, frozen=True, eq=False)
 class EzCqrs(Generic[C, E]):
@@ -39,7 +41,8 @@ class EzCqrs(Generic[C, E]):
         cmd: C,
         max_transactions: int,
         config: Config,
-    ) -> Result[list[E], ExecutionError | pydantic.ValidationError]:
+        expected_val: type[T],
+    ) -> Result[T, ExecutionError | pydantic.ValidationError]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -49,19 +52,19 @@ class EzCqrs(Generic[C, E]):
         if not isinstance(validated, Ok):
             return Err(validated.err())
 
-        resultant_events = await asyncio.create_task(
+        execution_result = await asyncio.create_task(
             coro=self.cmd_handler.handle(
                 command=cmd,
                 ops_registry=OpsRegistry[Any](max_lenght=max_transactions),
                 config=config,
             ),
         )
-        if not isinstance(resultant_events, Ok):
-            return Err(resultant_events.err())
+        if not isinstance(execution_result, Ok):
+            return Err(execution_result.err())
 
         event_dispatch_tasks: list[Coroutine[Any, Any, None]] = []
 
-        list_of_events = resultant_events.unwrap()
+        execution_value, list_of_events = execution_result.unwrap()
 
         for event in list_of_events:
             event_dispatch_tasks.append(
@@ -70,4 +73,8 @@ class EzCqrs(Generic[C, E]):
 
         asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
 
-        return Ok(list_of_events)
+        if not isinstance(execution_value, expected_val):
+            msg = "Returned value from command does not match expected type."
+            raise TypeError(msg)
+
+        return Ok(execution_value)

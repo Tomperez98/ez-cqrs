@@ -33,7 +33,10 @@ class CommandHandlerFramework(Generic[C, E]):
     cmd_handler: CommandHandler[C, E]
     cmd: C
 
-    _result: Result[list[E], ExecutionError] | None = field(init=False, default=None)
+    _result: Result[tuple[Any, list[E]], ExecutionError] | None = field(
+        init=False,
+        default=None,
+    )
     _is_valid: bool | None = field(init=False, default=None)
 
     def then_expect_is_valid(self) -> bool:
@@ -55,7 +58,18 @@ class CommandHandlerFramework(Generic[C, E]):
         if not isinstance(self._result, Ok):
             msg = f"expected success, received execution error: {self._result.err()}"
             raise TypeError(msg)
-        return self._result.unwrap() == expected_events
+        _, resultant_events = self._result.unwrap()
+        return resultant_events == expected_events
+
+    def then_expect_value(self, expected_value: Any) -> bool:  # noqa: ANN401
+        """Verify expected value has been produced by the command."""
+        if not self._result:
+            raise RuntimeError(NO_RESULT_MSG)
+        if not isinstance(self._result, Ok):
+            msg = f"expected success, received execution error: {self._result.err()}"
+            raise TypeError(msg)
+        resultant_value, _ = self._result.unwrap()
+        return resultant_value == expected_value
 
     def then_expect_error_message(self, err_msg: str) -> bool:
         """Verify expected error msg have been produced by the command."""
@@ -65,6 +79,17 @@ class CommandHandlerFramework(Generic[C, E]):
             msg = f"expected error, received events: {self._result.unwrap()}"
             raise TypeError(msg)
         return str(self._result.err()) == err_msg
+
+    def inspect_result(self) -> tuple[Any, list[E]]:
+        """Inspect execution result."""
+        if not self._result:
+            raise RuntimeError(NO_RESULT_MSG)
+
+        if not isinstance(self._result, Ok):
+            msg = f"expected success, received execution error: {self._result.err()}"
+            raise TypeError(msg)
+
+        return self._result.unwrap()
 
     def validate(
         self,
@@ -85,7 +110,7 @@ class CommandHandlerFramework(Generic[C, E]):
     ) -> Self:
         """Execute command while asserting and validating framework's rules."""
         ops_registry = OpsRegistry[Any](max_lenght=max_transactions)
-        resultant_events = await self.cmd_handler.handle(
+        execution_result = await self.cmd_handler.handle(
             command=self.cmd,
             ops_registry=ops_registry,
             config=config,
@@ -93,5 +118,6 @@ class CommandHandlerFramework(Generic[C, E]):
         if not ops_registry.is_empty():
             msg = "OpsRegistry is not empty after cmd execution."
             raise RuntimeError(msg)
-        self._result = resultant_events
+
+        self._result = execution_result
         return self

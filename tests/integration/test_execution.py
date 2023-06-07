@@ -92,16 +92,32 @@ class BankAccountCommandHandler(  # noqa: D101
         command: BankAccountCommand,
         ops_registry: OpsRegistry[Any],
         config: Config,
-    ) -> Result[list[BankAccountEvent], ExecutionError]:
+    ) -> Result[tuple[Any, list[BankAccountEvent]], ExecutionError]:
         _ = ops_registry
         _ = config
         if isinstance(command, OpenAccount):
             return Ok(
-                [AccountOpened(account_id=command.account_id, amount=command.amount)],
+                (
+                    None,
+                    [
+                        AccountOpened(
+                            account_id=command.account_id,
+                            amount=command.amount,
+                        ),
+                    ],
+                ),
             )
         if isinstance(command, DepositMoney):
             return Ok(
-                [MoneyDeposited(account_id=command.account_id, amount=command.amount)],
+                (
+                    1,
+                    [
+                        MoneyDeposited(
+                            account_id=command.account_id,
+                            amount=command.amount,
+                        ),
+                    ],
+                ),
             )
         assert_never(command)
 
@@ -143,20 +159,28 @@ class TestCommandHanlder:  # noqa: D101
         """Test handle method."""
         cmd_handler = BankAccountCommandHandler()
         app_config = Config()
-        resultant_events = await cmd_handler.handle(
+        execution_result = await cmd_handler.handle(
             command=command,
             ops_registry=OpsRegistry[Any](max_lenght=0),
             config=app_config,
         )
-        assert resultant_events.unwrap() == expected_events
+        _, resultant_events = execution_result.unwrap()
+        assert resultant_events == expected_events
 
     @pytest.mark.parametrize(
-        argnames=["cmd_handler", "cmd", "expected_events"],
+        argnames=["cmd_handler", "cmd", "expected_value", "expected_events"],
         argvalues=[
             (
                 BankAccountCommandHandler(),
                 OpenAccount(account_id="123", amount=1),
+                None,
                 [AccountOpened(account_id="123", amount=1)],
+            ),
+            (
+                BankAccountCommandHandler(),
+                DepositMoney(account_id="123", amount=1),
+                1,
+                [MoneyDeposited(account_id="123", amount=1)],
             ),
         ],
     )
@@ -164,6 +188,7 @@ class TestCommandHanlder:  # noqa: D101
         self,
         cmd_handler: BankAccountCommandHandler,
         cmd: BankAccountCommand,
+        expected_value: Any,  # noqa: ANN401
         expected_events: list[BankAccountEvent],
     ) -> None:
         """Test validate command with testing framework."""
@@ -181,3 +206,51 @@ class TestCommandHanlder:  # noqa: D101
             config=Config(),
         )
         assert framework.then_expect_events(expected_events=expected_events)
+        assert framework.then_expect_value(expected_value=expected_value)
+        resultant_value, resultant_events = framework.inspect_result()
+        assert resultant_value == expected_value
+        assert resultant_events == expected_events
+
+    @pytest.mark.parametrize(
+        argnames=["cmd_handler", "cmd", "expected_value", "expected_events"],
+        argvalues=[
+            (
+                BankAccountCommandHandler(),
+                OpenAccount(account_id="123", amount=1),
+                None,
+                [AccountOpened(account_id="123", amount=1)],
+            ),
+            (
+                BankAccountCommandHandler(),
+                DepositMoney(account_id="123", amount=1),
+                1,
+                [MoneyDeposited(account_id="123", amount=1)],
+            ),
+        ],
+    )
+    async def test_with_framework_without_execute(
+        self,
+        cmd_handler: BankAccountCommandHandler,
+        cmd: BankAccountCommand,
+        expected_value: Any,  # noqa: ANN401
+        expected_events: list[BankAccountEvent],
+    ) -> None:
+        """Test validate command with testing framework."""
+        framework = CommandHandlerFramework[
+            BankAccountCommand,
+            BankAccountEvent,
+        ](
+            cmd_handler=cmd_handler,
+            cmd=cmd,
+        )
+
+        with pytest.raises(RuntimeError):
+            framework.then_expect_is_not_valid()
+        with pytest.raises(RuntimeError):
+            framework.then_expect_is_valid()
+        with pytest.raises(RuntimeError):
+            framework.then_expect_events(expected_events=expected_events)
+        with pytest.raises(RuntimeError):
+            framework.then_expect_value(expected_value=expected_value)
+        with pytest.raises(RuntimeError):
+            framework.inspect_result()
