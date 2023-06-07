@@ -1,6 +1,7 @@
 """Testing framework."""
 from __future__ import annotations
 
+import asyncio
 import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Generic
@@ -110,10 +111,12 @@ class CommandHandlerFramework(Generic[C, E]):
     ) -> Self:
         """Execute command while asserting and validating framework's rules."""
         ops_registry = OpsRegistry[Any](max_lenght=max_transactions)
-        execution_result = await self.cmd_handler.handle(
-            command=self.cmd,
-            ops_registry=ops_registry,
-            config=config,
+        execution_result = await asyncio.create_task(
+            self.cmd_handler.handle(
+                command=self.cmd,
+                ops_registry=ops_registry,
+                config=config,
+            ),
         )
         if not ops_registry.is_empty():
             msg = "OpsRegistry is not empty after cmd execution."

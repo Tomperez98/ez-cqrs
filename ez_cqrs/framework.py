@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 T = TypeVar("T")
 
+
 @final
 @dataclass(repr=True, frozen=True, eq=False)
 class EzCqrs(Generic[C, E]):
@@ -35,7 +36,6 @@ class EzCqrs(Generic[C, E]):
     cmd_handler: CommandHandler[C, E]
     event_dispatcher: EventDispatcher[E]
 
-    
     async def run(
         self,
         cmd: C,

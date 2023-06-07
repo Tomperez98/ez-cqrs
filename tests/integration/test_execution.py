@@ -1,6 +1,7 @@
 """Test handler."""
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Union
 
@@ -159,10 +160,12 @@ class TestCommandHanlder:  # noqa: D101
         """Test handle method."""
         cmd_handler = BankAccountCommandHandler()
         app_config = Config()
-        execution_result = await cmd_handler.handle(
-            command=command,
-            ops_registry=OpsRegistry[Any](max_lenght=0),
-            config=app_config,
+        execution_result = await asyncio.create_task(
+            cmd_handler.handle(
+                command=command,
+                ops_registry=OpsRegistry[Any](max_lenght=0),
+                config=app_config,
+            ),
         )
         _, resultant_events = execution_result.unwrap()
         assert resultant_events == expected_events
@@ -201,9 +204,11 @@ class TestCommandHanlder:  # noqa: D101
         )
 
         assert framework.validate().then_expect_is_valid()
-        await framework.execute(
-            max_transactions=0,
-            config=Config(),
+        await asyncio.create_task(
+            framework.execute(
+                max_transactions=0,
+                config=Config(),
+            ),
         )
         assert framework.then_expect_events(expected_events=expected_events)
         assert framework.then_expect_value(expected_value=expected_value)
