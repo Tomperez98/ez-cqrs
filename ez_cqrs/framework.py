@@ -39,8 +39,12 @@ class EzCqrs(Generic[C, E]):
         cmd: C,
         max_transactions: int,
         config: Config,
-    ) -> Result[None, ExecutionError | pydantic.ValidationError]:
-        """Validate and execute command, then dispatch command events."""
+    ) -> Result[list[E], ExecutionError | pydantic.ValidationError]:
+        """
+        Validate and execute command, then dispatch command events.
+
+        Dispatched events are returned to the caller for client specific usage.
+        """
         validated = self.cmd_handler.validate(command=cmd)
         if not isinstance(validated, Ok):
             return Err(validated.err())
@@ -56,10 +60,14 @@ class EzCqrs(Generic[C, E]):
             return Err(resultant_events.err())
 
         event_dispatch_tasks: list[Coroutine[Any, Any, None]] = []
-        for event in resultant_events.unwrap():
+
+        list_of_events = resultant_events.unwrap()
+
+        for event in list_of_events:
             event_dispatch_tasks.append(
                 self.event_dispatcher.dispatch(event=event, config=config),
             )
 
-        asyncio.gather(*event_dispatch_tasks)
-        return Ok()
+        asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
+
+        return Ok(list_of_events)

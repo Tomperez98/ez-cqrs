@@ -14,7 +14,7 @@ from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import Command, DomainEvent
 from ez_cqrs.handler import CommandHandler
 from ez_cqrs.shared_state import Config
-from ez_cqrs.testing import Framework
+from ez_cqrs.testing import CommandHandlerFramework
 
 if TYPE_CHECKING:
     import sys
@@ -167,7 +167,7 @@ class TestCommandHanlder:  # noqa: D101
         expected_events: list[BankAccountEvent],
     ) -> None:
         """Test validate command with testing framework."""
-        framework = Framework[
+        framework = CommandHandlerFramework[
             BankAccountCommand,
             BankAccountEvent,
         ](
