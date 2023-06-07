@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Generic
 
@@ -9,6 +10,11 @@ from result import Err, Ok, Result
 
 from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import C, E
+
+if sys.version_info >= (3, 8):
+    from typing import final
+else:
+    from typing_extensions import final
 
 if TYPE_CHECKING:
     from collections.abc import Coroutine
@@ -27,6 +33,7 @@ class EzCqrs(Generic[C, E]):
     cmd_handler: CommandHandler[C, E]
     event_dispatcher: EventDispatcher[E]
 
+    @final
     async def run(
         self,
         cmd: C,

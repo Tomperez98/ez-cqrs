@@ -26,7 +26,7 @@ NO_RESULT_MSG = "No result to evaluate."
 
 
 @final
-@dataclass()
+@dataclass(frozen=False, repr=False, eq=False)
 class Framework(Generic[C, E]):
     """Testing framework."""
 

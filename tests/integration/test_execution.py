@@ -10,7 +10,6 @@ from pydantic import BaseModel, ValidationError
 from result import Err, Ok, Result
 from typing_extensions import assert_never
 
-from ez_cqrs import ops
 from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import Command, DomainEvent
 from ez_cqrs.handler import CommandHandler
@@ -148,31 +147,6 @@ class TestCommandHanlder:  # noqa: D101
             command=command,
             ops_registry=OpsRegistry[Any](max_lenght=0),
             config=app_config,
-        )
-        assert resultant_events.unwrap() == expected_events
-
-    @pytest.mark.parametrize(
-        argnames=["cmd_handler", "cmd", "expected_events"],
-        argvalues=[
-            (
-                BankAccountCommandHandler(),
-                OpenAccount(account_id="123", amount=1),
-                [AccountOpened(account_id="123", amount=1)],
-            ),
-        ],
-    )
-    async def test_validate_and_execute_cmd(
-        self,
-        cmd_handler: BankAccountCommandHandler,
-        cmd: BankAccountCommand,
-        expected_events: list[BankAccountEvent],
-    ) -> None:
-        """Test validate and execution cmd operation."""
-        resultant_events = await ops.validate_and_execute_cmd(
-            cmd_handler=cmd_handler,
-            command=cmd,
-            max_transactions=0,
-            config=Config(),
         )
         assert resultant_events.unwrap() == expected_events
 

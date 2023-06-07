@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import abc
+import sys
 from typing import TYPE_CHECKING, Union
 
+if sys.version_info >= (3, 8):
+    from typing import final
+else:
+    from typing_extensions import final
 if TYPE_CHECKING:
-    import sys
-
     if sys.version_info >= (3, 10):
         from typing import TypeAlias
     else:
@@ -24,6 +27,7 @@ class DomainError(abc.ABC, Exception):
     """
 
 
+@final
 class DatabaseError(Exception):
     """Raised whwne that's an error interacting with system's database."""
 
@@ -31,6 +35,7 @@ class DatabaseError(Exception):
         super().__init__(f"An error ocurred with database {database_error}")
 
 
+@final
 class UnexpectedError(Exception):
     """
     Raised when an unexpected error was encountered.
