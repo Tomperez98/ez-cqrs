@@ -4,10 +4,10 @@ from __future__ import annotations
 import abc
 from typing import TYPE_CHECKING, Any, Generic
 
-from ez_cqrs.components import C, E, V
+from ez_cqrs.components import C, E
 
 if TYPE_CHECKING:
-    from pydantic import ValidationError
+    import pydantic
     from result import Result
 
     from ez_cqrs.acid_exec import OpsRegistry
@@ -15,15 +15,14 @@ if TYPE_CHECKING:
     from ez_cqrs.shared_state import Config
 
 
-class CommandHandler(abc.ABC, Generic[C, E, V]):
+class CommandHandler(abc.ABC, Generic[C, E]):
     """Command handler handles every command to complete one user intent."""
 
     @abc.abstractmethod
     def validate(
         self,
         command: C,
-        schema: type[V],
-    ) -> Result[None, ValidationError]:
+    ) -> Result[None, pydantic.ValidationError]:
         """Validate command data."""
 
     @abc.abstractmethod

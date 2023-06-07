@@ -6,12 +6,13 @@ from typing import TYPE_CHECKING, Any, Union
 
 import pydantic
 import pytest
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 from result import Err, Ok, Result
+from typing_extensions import assert_never
 
 from ez_cqrs import ops
 from ez_cqrs.acid_exec import OpsRegistry
-from ez_cqrs.components import Command, CommandValidator, DomainEvent
+from ez_cqrs.components import Command, DomainEvent
 from ez_cqrs.handler import CommandHandler
 from ez_cqrs.shared_state import Config
 from ez_cqrs.testing import Framework
@@ -42,13 +43,6 @@ class DepositMoney(Command):  # noqa: D101
 BankAccountCommand: TypeAlias = Union[OpenAccount, DepositMoney]
 
 
-class OpenAccountValidator(CommandValidator):  # noqa: D101
-    amount: int = pydantic.Field(gt=0)
-
-
-BankAccountValidator: TypeAlias = OpenAccountValidator
-
-
 @dataclass(frozen=True)
 class AccountOpened(DomainEvent):  # noqa: D101
     account_id: str
@@ -65,19 +59,34 @@ BankAccountEvent: TypeAlias = Union[AccountOpened, MoneyDeposited]
 
 
 class BankAccountCommandHandler(  # noqa: D101
-    CommandHandler[BankAccountCommand, BankAccountEvent, BankAccountValidator],
+    CommandHandler[BankAccountCommand, BankAccountEvent],
 ):
     def validate(  # noqa: D102
         self,
         command: BankAccountCommand,
-        schema: type[BankAccountValidator],
     ) -> Result[None, ValidationError]:
-        try:
-            schema(**command.to_dict())
-        except ValidationError as e:
-            return Err(e)
+        if isinstance(command, OpenAccount):
 
-        return Ok()
+            class OpenAccountValidator(BaseModel):
+                amount: int = pydantic.Field(gt=0)
+
+            try:
+                OpenAccountValidator(amount=command.amount)
+            except ValidationError as e:
+                return Err(e)
+            return Ok()
+        if isinstance(command, DepositMoney):
+
+            class DepositMoneyValidator(BaseModel):
+                amount: int = pydantic.Field(gt=0)
+
+            try:
+                DepositMoneyValidator(amount=command.amount)
+            except ValidationError as e:
+                return Err(e)
+            return Ok()
+
+        assert_never(command)
 
     async def handle(  # noqa: D102
         self,
@@ -95,28 +104,26 @@ class BankAccountCommandHandler(  # noqa: D101
             return Ok(
                 [MoneyDeposited(account_id=command.account_id, amount=command.amount)],
             )
-        return None
+        assert_never(command)
 
 
 @pytest.mark.integration()
 class TestCommandHanlder:  # noqa: D101
     @pytest.mark.parametrize(
-        argnames=["command", "validator"],
+        argnames="command",
         argvalues=[
-            (OpenAccount(account_id="123", amount=1_000_000), OpenAccountValidator),
+            OpenAccount(account_id="123", amount=1_000_000),
         ],
     )
     async def test_validate(
         self,
         command: BankAccountCommand,
-        validator: type[BankAccountValidator],
     ) -> None:
         """Test validate method."""
         cmd_handler = BankAccountCommandHandler()
 
         validated = cmd_handler.validate(
             command=command,
-            schema=validator,
         )
         assert validated.unwrap()
 
@@ -145,12 +152,11 @@ class TestCommandHanlder:  # noqa: D101
         assert resultant_events.unwrap() == expected_events
 
     @pytest.mark.parametrize(
-        argnames=["cmd_handler", "cmd", "validator", "expected_events"],
+        argnames=["cmd_handler", "cmd", "expected_events"],
         argvalues=[
             (
                 BankAccountCommandHandler(),
                 OpenAccount(account_id="123", amount=1),
-                OpenAccountValidator,
                 [AccountOpened(account_id="123", amount=1)],
             ),
         ],
@@ -159,26 +165,23 @@ class TestCommandHanlder:  # noqa: D101
         self,
         cmd_handler: BankAccountCommandHandler,
         cmd: BankAccountCommand,
-        validator: type[BankAccountValidator],
         expected_events: list[BankAccountEvent],
     ) -> None:
         """Test validate and execution cmd operation."""
         resultant_events = await ops.validate_and_execute_cmd(
             cmd_handler=cmd_handler,
             command=cmd,
-            schema=validator,
             max_transactions=0,
             config=Config(),
         )
         assert resultant_events.unwrap() == expected_events
 
     @pytest.mark.parametrize(
-        argnames=["cmd_handler", "cmd", "validator", "expected_events"],
+        argnames=["cmd_handler", "cmd", "expected_events"],
         argvalues=[
             (
                 BankAccountCommandHandler(),
                 OpenAccount(account_id="123", amount=1),
-                OpenAccountValidator,
                 [AccountOpened(account_id="123", amount=1)],
             ),
         ],
@@ -187,18 +190,15 @@ class TestCommandHanlder:  # noqa: D101
         self,
         cmd_handler: BankAccountCommandHandler,
         cmd: BankAccountCommand,
-        validator: type[BankAccountValidator],
         expected_events: list[BankAccountEvent],
     ) -> None:
         """Test validate command with testing framework."""
         framework = Framework[
             BankAccountCommand,
             BankAccountEvent,
-            BankAccountValidator,
         ](
             cmd_handler=cmd_handler,
             cmd=cmd,
-            schema_validator=validator,
         )
 
         assert framework.validate().then_expect_is_valid()

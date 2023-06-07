@@ -13,7 +13,7 @@ else:
     from typing_extensions import final
 
 from ez_cqrs.acid_exec import OpsRegistry
-from ez_cqrs.components import C, E, V
+from ez_cqrs.components import C, E
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -27,13 +27,12 @@ NO_RESULT_MSG = "No result to evaluate."
 
 @final
 @dataclass()
-class Framework(Generic[C, E, V]):
+class Framework(Generic[C, E]):
     """Testing framework."""
 
-    cmd_handler: CommandHandler[C, E, V]
+    cmd_handler: CommandHandler[C, E]
     cmd: C
 
-    schema_validator: type[V]
     _result: Result[list[E], ExecutionError] | None = field(init=False, default=None)
     _is_valid: bool | None = field(init=False, default=None)
 
@@ -73,7 +72,6 @@ class Framework(Generic[C, E, V]):
         """Validate command."""
         validated = self.cmd_handler.validate(
             command=self.cmd,
-            schema=self.schema_validator,
         )
         if not isinstance(validated, Ok):
             self._is_valid = False
