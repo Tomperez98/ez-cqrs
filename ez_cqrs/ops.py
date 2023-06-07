@@ -8,24 +8,23 @@ from result import Err, Ok
 from ez_cqrs.acid_exec import OpsRegistry
 
 if TYPE_CHECKING:
-    from pydantic import ValidationError
+    import pydantic
     from result import Result
 
-    from ez_cqrs.components import C, E, V
+    from ez_cqrs.components import C, E
     from ez_cqrs.error import ExecutionError
     from ez_cqrs.handler import CommandHandler
     from ez_cqrs.shared_state import Config
 
 
 async def validate_and_execute_cmd(
-    cmd_handler: CommandHandler[C, E, V],
+    cmd_handler: CommandHandler[C, E],
     command: C,
-    schema: type[V],
     max_transactions: int,
     config: Config,
-) -> Result[list[E], ExecutionError | ValidationError]:
+) -> Result[list[E], ExecutionError | pydantic.ValidationError]:
     """Validate and execute command."""
-    validated = cmd_handler.validate(command=command, schema=schema)
+    validated = cmd_handler.validate(command=command)
     if not isinstance(validated, Ok):
         return Err(validated.err())
 

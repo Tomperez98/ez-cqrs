@@ -7,7 +7,6 @@ from typing import TypeVar
 
 from mashumaro import DataClassDictMixin
 from mashumaro.mixins.orjson import DataClassORJSONMixin
-from pydantic import BaseModel
 
 
 @dataclass(frozen=True)
@@ -19,15 +18,6 @@ class Command(abc.ABC, DataClassDictMixin):
     are the simplest components of any CQRS system and consist of little more than
     packaged data.
     """
-
-
-class CommandValidator(abc.ABC, BaseModel):
-    """Command input validator."""
-
-    class Config:
-        """Custom configuration."""
-
-        allow_mutation = False
 
 
 @dataclass(frozen=True)
@@ -51,4 +41,3 @@ class DomainEvent(abc.ABC, DataClassORJSONMixin):
 
 C = TypeVar("C", bound=Command)
 E = TypeVar("E", bound=DomainEvent)
-V = TypeVar("V", bound=CommandValidator)
