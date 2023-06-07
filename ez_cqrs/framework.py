@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from ez_cqrs.shared_state import Config
 
 
+@final
 @dataclass(repr=True, frozen=True, eq=False)
 class EzCqrs(Generic[C, E]):
     """EzCqrs framework."""
@@ -33,7 +34,6 @@ class EzCqrs(Generic[C, E]):
     cmd_handler: CommandHandler[C, E]
     event_dispatcher: EventDispatcher[E]
 
-    @final
     async def run(
         self,
         cmd: C,
