@@ -41,8 +41,7 @@ class EzCqrs(Generic[C, E]):
         cmd: C,
         max_transactions: int,
         config: Config,
-        expected_val: type[T],
-    ) -> Result[T, ExecutionError | pydantic.ValidationError]:
+    ) -> Result[Any, ExecutionError | pydantic.ValidationError]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -72,9 +71,5 @@ class EzCqrs(Generic[C, E]):
             )
 
         asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
-
-        if not isinstance(execution_value, expected_val):
-            msg = "Returned value from command does not match expected type."
-            raise TypeError(msg)
 
         return Ok(execution_value)
