@@ -126,7 +126,7 @@ pyparsing==3.0.9
     # via pip-requirements-parser
 pyproject-hooks==1.0.0
     # via build
-pyrgo==0.2.5
+pyrgo==0.3.0
     # via ez_cqrs (pyproject.toml)
 pytest==7.3.1
     # via

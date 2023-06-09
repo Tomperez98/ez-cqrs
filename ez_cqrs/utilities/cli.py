@@ -13,7 +13,10 @@ def coro(f: Any) -> Callable[[Any], Any]:  # noqa: ANN401
     """Run CLI command as a coroutine."""
 
     @wraps(f)
-    def wrapper(*args, **kwargs) -> Any:  # type:ignore[no-untyped-def]  # noqa: ANN401
+    def wrapper(  # type:ignore[no-untyped-def]
+        *args,  # noqa: ANN002
+        **kwargs,  # noqa: ANN003
+    ) -> Any:  # noqa: ANN401
         return asyncio.run(f(*args, **kwargs))
 
     return wrapper
