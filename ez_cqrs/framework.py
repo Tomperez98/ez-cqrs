@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 
     from ez_cqrs.error import ExecutionError
     from ez_cqrs.handler import CommandHandler, EventDispatcher
-    from ez_cqrs.shared_state import Config
 
 T = TypeVar("T")
 
@@ -40,7 +39,6 @@ class EzCqrs(Generic[C, E]):
         self,
         cmd: C,
         max_transactions: int,
-        config: Config,
     ) -> Result[Any, ExecutionError | pydantic.ValidationError]:
         """
         Validate and execute command, then dispatch command events.
@@ -55,7 +53,6 @@ class EzCqrs(Generic[C, E]):
             coro=self.cmd_handler.handle(
                 command=cmd,
                 ops_registry=OpsRegistry[Any](max_lenght=max_transactions),
-                config=config,
             ),
         )
         if not isinstance(execution_result, Ok):
@@ -67,7 +64,7 @@ class EzCqrs(Generic[C, E]):
 
         for event in list_of_events:
             event_dispatch_tasks.append(
-                self.event_dispatcher.dispatch(event=event, config=config),
+                self.event_dispatcher.dispatch(event=event),
             )
 
         asyncio.gather(*event_dispatch_tasks, return_exceptions=False)

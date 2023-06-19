@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
     from ez_cqrs.error import ExecutionError
     from ez_cqrs.handler import CommandHandler
-    from ez_cqrs.shared_state import Config
+
 
 NO_RESULT_MSG = "No result to evaluate."
 
@@ -107,7 +107,6 @@ class CommandHandlerFramework(Generic[C, E]):
     async def execute(
         self,
         max_transactions: int,
-        config: Config,
     ) -> Self:
         """Execute command while asserting and validating framework's rules."""
         ops_registry = OpsRegistry[Any](max_lenght=max_transactions)
@@ -115,7 +114,6 @@ class CommandHandlerFramework(Generic[C, E]):
             self.cmd_handler.handle(
                 command=self.cmd,
                 ops_registry=ops_registry,
-                config=config,
             ),
         )
         if not ops_registry.is_empty():

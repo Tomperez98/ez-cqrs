@@ -14,7 +14,6 @@ from typing_extensions import assert_never
 from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import Command, DomainEvent
 from ez_cqrs.handler import CommandHandler
-from ez_cqrs.shared_state import Config
 from ez_cqrs.testing import CommandHandlerFramework
 
 if TYPE_CHECKING:
@@ -92,10 +91,9 @@ class BankAccountCommandHandler(  # noqa: D101
         self,
         command: BankAccountCommand,
         ops_registry: OpsRegistry[Any],
-        config: Config,
     ) -> Result[tuple[Any, list[BankAccountEvent]], ExecutionError]:
         _ = ops_registry
-        _ = config
+
         if isinstance(command, OpenAccount):
             return Ok(
                 (
@@ -159,12 +157,11 @@ class TestCommandHanlder:  # noqa: D101
     ) -> None:
         """Test handle method."""
         cmd_handler = BankAccountCommandHandler()
-        app_config = Config()
+
         execution_result = await asyncio.create_task(
             cmd_handler.handle(
                 command=command,
                 ops_registry=OpsRegistry[Any](max_lenght=0),
-                config=app_config,
             ),
         )
         _, resultant_events = execution_result.unwrap()
@@ -207,7 +204,6 @@ class TestCommandHanlder:  # noqa: D101
         await asyncio.create_task(
             framework.execute(
                 max_transactions=0,
-                config=Config(),
             ),
         )
         assert framework.then_expect_events(expected_events=expected_events)
