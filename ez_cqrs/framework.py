@@ -53,6 +53,7 @@ class EzCqrs(Generic[C, E]):
             coro=self.cmd_handler.handle(
                 command=cmd,
                 ops_registry=OpsRegistry[Any](max_lenght=max_transactions),
+                event_registry=[],
             ),
         )
         if not isinstance(execution_result, Ok):

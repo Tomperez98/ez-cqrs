@@ -91,8 +91,10 @@ class BankAccountCommandHandler(  # noqa: D101
         self,
         command: BankAccountCommand,
         ops_registry: OpsRegistry[Any],
+        event_registry: list[BankAccountEvent],
     ) -> Result[tuple[Any, list[BankAccountEvent]], ExecutionError]:
         _ = ops_registry
+        _ = event_registry
 
         if isinstance(command, OpenAccount):
             return Ok(
@@ -162,6 +164,7 @@ class TestCommandHanlder:  # noqa: D101
             cmd_handler.handle(
                 command=command,
                 ops_registry=OpsRegistry[Any](max_lenght=0),
+                event_registry=[],
             ),
         )
         _, resultant_events = execution_result.unwrap()

@@ -29,6 +29,7 @@ class CommandHandler(abc.ABC, Generic[C, E]):
         self,
         command: C,
         ops_registry: OpsRegistry[Any],
+        event_registry: list[E],
     ) -> Result[tuple[Any, list[E]], ExecutionError]:
         """
         Consume and process commands.

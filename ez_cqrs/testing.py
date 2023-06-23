@@ -114,6 +114,7 @@ class CommandHandlerFramework(Generic[C, E]):
             self.cmd_handler.handle(
                 command=self.cmd,
                 ops_registry=ops_registry,
+                event_registry=[],
             ),
         )
         if not ops_registry.is_empty():
