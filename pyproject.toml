@@ -25,6 +25,7 @@ dev = [
     "pyrgo>=0.3.0",
     "pytest-cov",
     "pytest-asyncio",
+    "tomli"
 ]
 
 [project.urls]
