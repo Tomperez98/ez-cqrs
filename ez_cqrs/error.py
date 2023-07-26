@@ -2,14 +2,11 @@
 from __future__ import annotations
 
 import abc
-import sys
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, final
 
-if sys.version_info >= (3, 8):
-    from typing import final
-else:
-    from typing_extensions import final
 if TYPE_CHECKING:
+    import sys
+
     if sys.version_info >= (3, 10):
         from typing import TypeAlias
     else:

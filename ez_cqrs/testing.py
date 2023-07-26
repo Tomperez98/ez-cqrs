@@ -2,16 +2,10 @@
 from __future__ import annotations
 
 import asyncio
-import sys
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Generic
+from typing import TYPE_CHECKING, Any, Generic, final
 
 from result import Ok, Result
-
-if sys.version_info >= (3, 8):
-    from typing import final
-else:
-    from typing_extensions import final
 
 from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import C, E

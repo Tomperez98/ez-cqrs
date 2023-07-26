@@ -30,7 +30,7 @@ class CommandHandler(abc.ABC, Generic[C, E]):
         command: C,
         ops_registry: OpsRegistry[Any],
         event_registry: list[E],
-    ) -> Result[tuple[Any, list[E]], ExecutionError]:
+    ) -> Result[Any, ExecutionError]:
         """
         Consume and process commands.
 
