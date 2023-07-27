@@ -72,6 +72,10 @@ class EzCqrs(Generic[C, E]):
             if not isinstance(commited_or_err, Ok):
                 return commited_or_err
 
+            if not ops_registry.is_empty():
+                msg = "Ops registry didn't came empty after transactions commit."
+                raise RuntimeError(msg)
+
         event_dispatch_tasks = (
             self.event_dispatcher.dispatch(x) for x in event_registry
         )

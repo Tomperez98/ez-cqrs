@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ez_cqrs"
-version = "1.4.2"
+version = "1.4.3"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -12,21 +12,12 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 authors = [
-    { name = "Tomas Perez Alvarez", email = "tomasperezalvarez@gmail.com"}
+    { name = "Tomas Perez Alvarez", email = "tomasperezalvarez@gmail.com" },
 ]
-dependencies = [
-    "mashumaro[orjson]",
-    "result",
-    "pydantic"
-]
+dependencies = ["mashumaro[orjson]", "result", "pydantic"]
 
 [project.optional-dependencies]
-dev = [
-    "pyrgo>=0.3.0",
-    "pytest-cov",
-    "pytest-asyncio",
-    "tomli"
-]
+dev = ["pyrgo>=0.3.0", "pytest-cov", "pytest-asyncio", "tomli"]
 
 [project.urls]
 Documentation = "https://github.com/Tomperez98/ez-cqrs#readme"
@@ -35,11 +26,7 @@ Source = "https://github.com/Tomperez98/ez-cqrs"
 
 [tool.ruff]
 line-length = 88
-ignore = [
-    "ANN101",
-    "D203",
-    "D212",
-]
+ignore = ["ANN101", "D203", "D212"]
 select = ["ALL"]
 fix = false
 exclude = [
@@ -97,20 +84,17 @@ addopts = [
     "--cov=ez_cqrs",
     "--cov-report=term-missing:skip-covered",
 ]
-markers = [
-    "integration: mark integration tests.",
-    "unit: mark unittest.",
-]
+markers = ["integration: mark integration tests.", "unit: mark unittest."]
 asyncio_mode = "auto"
 
 [tool.coverage.report]
 precision = 1
 exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-  "@overload",
-  "raise NotImplementedError"
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@overload",
+    "raise NotImplementedError",
 ]
 
 
