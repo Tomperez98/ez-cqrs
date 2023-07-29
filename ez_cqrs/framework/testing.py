@@ -3,11 +3,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generic, final
 
-from result import Ok
-
 from ez_cqrs.components import C, E
 
 if TYPE_CHECKING:
+    from result import Result
+
     from ez_cqrs.acid_exec import ACID
     from ez_cqrs.components import UseCaseOutput
     from ez_cqrs.error import DomainError
@@ -42,29 +42,10 @@ class EzCQRSTester(Generic[C, E]):
             raise RuntimeError(NO_COMMAND_ERROR)
         self.command = None
 
-    async def expect_result(
+    async def expect(
         self,
         max_transactions: int,
-        expected_result: tuple[UseCaseOutput, list[E]],
-    ) -> bool:
-        """Execute use case and expected a result with emitted events.."""
-        if self.command is None:
-            raise RuntimeError(NO_COMMAND_ERROR)
-
-        use_case_result = await self.framework.run(
-            cmd=self.command,
-            max_transactions=max_transactions,
-            app_database=self.app_database,
-        )
-        if not isinstance(use_case_result, Ok):
-            return False
-
-        return use_case_result.unwrap() == expected_result
-
-    async def expect_error(
-        self,
-        max_transactions: int,
-        expected_error: DomainError,
+        expected: Result[tuple[UseCaseOutput, list[E]], DomainError],
     ) -> bool:
         """Execute use case and expect a domain error."""
         if self.command is None:
@@ -75,7 +56,4 @@ class EzCQRSTester(Generic[C, E]):
             max_transactions=max_transactions,
             app_database=self.app_database,
         )
-        if isinstance(use_case_result, Ok):
-            return False
-
-        return use_case_result.err() == expected_error
+        return use_case_result == expected

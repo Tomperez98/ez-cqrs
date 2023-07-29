@@ -140,19 +140,23 @@ async def test_execution_both_commands() -> None:
         app_database=None,
     )
     framework_tester.with_command(command=OpenAccount(account_id="123", amount=12))
-    assert await framework_tester.expect_result(
+    assert await framework_tester.expect(
         max_transactions=0,
-        expected_result=(
-            OpenAccountOutput(account_id="123"),
-            [AccountOpened(account_id="123", amount=12)],
+        expected=Ok(
+            (
+                OpenAccountOutput(account_id="123"),
+                [AccountOpened(account_id="123", amount=12)],
+            ),
         ),
     )
     framework_tester.clear()
     framework_tester.with_command(command=DepositMoney(account_id="123", amount=20))
-    assert await framework_tester.expect_result(
+    assert await framework_tester.expect(
         max_transactions=0,
-        expected_result=(
-            DepositMoneyOutput(account_id="123", amount=20),
-            [MoneyDeposited(account_id="123", amount=20)],
+        expected=Ok(
+            (
+                DepositMoneyOutput(account_id="123", amount=20),
+                [MoneyDeposited(account_id="123", amount=20)],
+            ),
         ),
     )
