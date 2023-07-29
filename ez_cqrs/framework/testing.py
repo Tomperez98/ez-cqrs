@@ -65,7 +65,7 @@ class EzCQRSTester(Generic[C, E]):
             error = use_case_result.err()
             if not isinstance(error, DomainError):
                 msg = f"Encounter error is {error}"
-                raise RuntimeError(msg)
+                raise TypeError(msg)
 
         return all(
             [use_case_result == expected_result, event_registry == expected_events],
