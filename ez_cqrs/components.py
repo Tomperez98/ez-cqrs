@@ -45,3 +45,4 @@ class DomainEvent(DataClassORJSONMixin):
 
 C = TypeVar("C", bound=Command)
 E = TypeVar("E", bound=DomainEvent)
+OUT = TypeVar("OUT", bound=UseCaseOutput)

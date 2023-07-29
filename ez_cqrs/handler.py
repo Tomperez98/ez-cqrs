@@ -4,18 +4,17 @@ from __future__ import annotations
 import abc
 from typing import TYPE_CHECKING, Any, Generic
 
-from ez_cqrs.components import C, E
+from ez_cqrs.components import OUT, C, E
 
 if TYPE_CHECKING:
     import pydantic
     from result import Result
 
     from ez_cqrs.acid_exec import OpsRegistry
-    from ez_cqrs.components import UseCaseOutput
     from ez_cqrs.error import ExecutionError
 
 
-class CommandHandler(abc.ABC, Generic[C, E]):
+class CommandHandler(abc.ABC, Generic[C, E, OUT]):
     """Command handler handles every command to complete one user intent."""
 
     @abc.abstractmethod
@@ -31,7 +30,7 @@ class CommandHandler(abc.ABC, Generic[C, E]):
         command: C,
         ops_registry: OpsRegistry[Any],
         event_registry: list[E],
-    ) -> Result[UseCaseOutput, ExecutionError]:
+    ) -> Result[OUT, ExecutionError]:
         """
         Consume and process commands.
 

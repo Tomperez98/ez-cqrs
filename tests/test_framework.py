@@ -62,8 +62,11 @@ class DepositMoneyOutput(UseCaseOutput):
     amount: int
 
 
+BankAccountOutput: TypeAlias = Union[OpenAccountOutput, DepositMoneyOutput]
+
+
 class BankAccountCommandHandler(
-    CommandHandler[BankAccountCommand, BankAccountEvent],
+    CommandHandler[BankAccountCommand, BankAccountEvent, BankAccountOutput],
 ):
     def validate(
         self,
@@ -97,7 +100,7 @@ class BankAccountCommandHandler(
         command: BankAccountCommand,
         ops_registry: OpsRegistry[Any],
         event_registry: list[BankAccountEvent],
-    ) -> Result[UseCaseOutput, ExecutionError]:
+    ) -> Result[BankAccountOutput, ExecutionError]:
         _ = ops_registry
 
         if isinstance(command, OpenAccount):
@@ -132,8 +135,12 @@ class BankAccountEventDispatcher(EventDispatcher[BankAccountEvent]):
 
 async def test_execution_both_commands() -> None:
     """Test both commands execution."""
-    framework_tester = EzCQRSTester[BankAccountCommand, BankAccountEvent](
-        framework=EzCqrs[BankAccountCommand, BankAccountEvent](
+    framework_tester = EzCQRSTester[
+        BankAccountCommand,
+        BankAccountEvent,
+        BankAccountOutput,
+    ](
+        framework=EzCqrs[BankAccountCommand, BankAccountEvent, BankAccountOutput](
             cmd_handler=BankAccountCommandHandler(),
             event_dispatcher=BankAccountEventDispatcher(),
         ),

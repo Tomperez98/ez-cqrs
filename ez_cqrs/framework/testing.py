@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Generic, final
 
 from result import Ok
 
-from ez_cqrs.components import C, E
+from ez_cqrs.components import OUT, C, E
 from ez_cqrs.error import DomainError
 
 if TYPE_CHECKING:
@@ -22,10 +22,10 @@ NO_EXECUTION_ERROR = "Run execute before checking results."
 
 
 @final
-class EzCQRSTester(Generic[C, E]):
+class EzCQRSTester(Generic[C, E, OUT]):
     """Testing framework for EzCRQS."""
 
-    def __init__(self, framework: EzCqrs[C, E], app_database: ACID | None) -> None:
+    def __init__(self, framework: EzCqrs[C, E, OUT], app_database: ACID | None) -> None:
         """Test framework for EzCRQS."""
         self.framework = framework
         self.app_database = app_database

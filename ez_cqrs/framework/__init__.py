@@ -8,14 +8,13 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar, final
 from result import Ok
 
 from ez_cqrs.acid_exec import OpsRegistry
-from ez_cqrs.components import C, E
+from ez_cqrs.components import OUT, C, E
 
 if TYPE_CHECKING:
     import pydantic
     from result import Result
 
     from ez_cqrs.acid_exec import ACID
-    from ez_cqrs.components import UseCaseOutput
     from ez_cqrs.error import ExecutionError
     from ez_cqrs.handler import CommandHandler, EventDispatcher
 
@@ -24,10 +23,10 @@ T = TypeVar("T")
 
 @final
 @dataclass(repr=True, frozen=True, eq=False)
-class EzCqrs(Generic[C, E]):
+class EzCqrs(Generic[C, E, OUT]):
     """EzCqrs framework."""
 
-    cmd_handler: CommandHandler[C, E]
+    cmd_handler: CommandHandler[C, E, OUT]
     event_dispatcher: EventDispatcher[E]
 
     async def run(
@@ -36,7 +35,7 @@ class EzCqrs(Generic[C, E]):
         max_transactions: int,
         app_database: ACID | None,
         event_registry: list[E],
-    ) -> Result[UseCaseOutput, ExecutionError | pydantic.ValidationError]:
+    ) -> Result[OUT, ExecutionError | pydantic.ValidationError]:
         """
         Validate and execute command, then dispatch command events.
 
