@@ -45,15 +45,21 @@ class EzCQRSTester(Generic[C, E]):
     async def expect(
         self,
         max_transactions: int,
-        expected: Result[tuple[UseCaseOutput, list[E]], DomainError],
+        expected_result: Result[UseCaseOutput, DomainError],
+        expected_events: list[E],
     ) -> bool:
         """Execute use case and expect a domain error."""
         if self.command is None:
             raise RuntimeError(NO_COMMAND_ERROR)
 
+        event_registry: list[E] = []
         use_case_result = await self.framework.run(
             cmd=self.command,
             max_transactions=max_transactions,
             app_database=self.app_database,
+            event_registry=event_registry,
         )
-        return use_case_result == expected
+
+        return all(
+            [use_case_result == expected_result, event_registry == expected_events],
+        )

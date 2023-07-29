@@ -35,10 +35,8 @@ class EzCqrs(Generic[C, E]):
         cmd: C,
         max_transactions: int,
         app_database: ACID | None,
-    ) -> Result[
-        tuple[UseCaseOutput, list[E]],
-        ExecutionError | pydantic.ValidationError,
-    ]:
+        event_registry: list[E],
+    ) -> Result[UseCaseOutput, ExecutionError | pydantic.ValidationError]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -49,7 +47,6 @@ class EzCqrs(Generic[C, E]):
             raise RuntimeError(msg)
 
         ops_registry = OpsRegistry[Any](max_lenght=max_transactions)
-        event_registry: list[E] = []
 
         validated_or_err = self.cmd_handler.validate(
             command=cmd,
@@ -88,4 +85,4 @@ class EzCqrs(Generic[C, E]):
 
         asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
 
-        return Ok((execution_result_or_err.unwrap(), event_registry))
+        return Ok(execution_result_or_err.unwrap())
