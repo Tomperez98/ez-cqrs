@@ -5,14 +5,17 @@ import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, final
 
-from result import Ok, Result
+from result import Ok
 
-from ez_cqrs.acid_exec import IRepository, OpsRegistry
+from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import C, E
 
 if TYPE_CHECKING:
     import pydantic
+    from result import Result
 
+    from ez_cqrs.acid_exec import ACID
+    from ez_cqrs.components import UseCaseOutput
     from ez_cqrs.error import ExecutionError
     from ez_cqrs.handler import CommandHandler, EventDispatcher
 
@@ -31,8 +34,11 @@ class EzCqrs(Generic[C, E]):
         self,
         cmd: C,
         max_transactions: int,
-        app_database: IRepository | None,
-    ) -> Result[Any, ExecutionError | pydantic.ValidationError]:
+        app_database: ACID | None,
+    ) -> Result[
+        tuple[UseCaseOutput, list[E]],
+        ExecutionError | pydantic.ValidationError,
+    ]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -82,4 +88,4 @@ class EzCqrs(Generic[C, E]):
 
         asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
 
-        return Ok(execution_result_or_err.unwrap())
+        return Ok((execution_result_or_err.unwrap(), event_registry))

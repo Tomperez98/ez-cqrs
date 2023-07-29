@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ez_cqrs"
-version = "1.4.3"
+version = "2.0.0"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -54,7 +54,14 @@ exclude = [
 [tool.ruff.per-file-ignores]
 "scripts/*.py" = ["INP001"]
 "__init__.py" = ["D104"]
-"tests/*.py" = ["INP001", "S101"]
+"tests/*.py" = ["INP001", "S101", "D101", "D102"]
+
+[tool.ruff.flake8-type-checking]
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "mashumaro.mixins.orjson.DataClassORJSONMixin",
+]
+strict = true
 
 [tool.ruff.isort]
 known-first-party = ["ez_cqrs"]

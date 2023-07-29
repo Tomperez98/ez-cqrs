@@ -10,14 +10,22 @@
         // https://github.com/microsoft/vscode-python/issues/693#issuecomment-367856613
         "--no-cov"
     ],
-    "python.testing.pytestEnabled": true,
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.formatOnType": false,
+        "editor.wordBasedSuggestions": false
+    },
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.completeFunctionParens": true,
-    "python.analysis.inlayHints.callArgumentNames": true,
-    "python.analysis.inlayHints.variableTypes": true,
+    "python.analysis.extraCommitChars": false,
+    "python.analysis.inlayHints.callArgumentNames": false,
+    "python.analysis.inlayHints.pytestParameters": false,
+    "python.analysis.inlayHints.functionReturnTypes": false,
+    "python.analysis.inlayHints.variableTypes": false,
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.userFileIndexingLimit": -1,
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
-    }
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.analysis.diagnosticMode": "workspace",
+
+
 }

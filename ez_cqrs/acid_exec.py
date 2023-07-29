@@ -54,7 +54,7 @@ class OpsRegistry(Generic[T]):
         return len(self._storage)
 
 
-class IRepository(abc.ABC):
+class ACID(abc.ABC):
     """
     Repository gives acces to the system database layer.
 

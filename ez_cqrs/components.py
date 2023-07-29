@@ -1,7 +1,6 @@
 """CQRS core components."""
 from __future__ import annotations
 
-import abc
 from dataclasses import dataclass
 from typing import TypeVar
 
@@ -10,7 +9,12 @@ from mashumaro.mixins.orjson import DataClassORJSONMixin
 
 
 @dataclass(frozen=True)
-class Command(abc.ABC, DataClassDictMixin):
+class UseCaseOutput(DataClassDictMixin):
+    """UseCase Output container."""
+
+
+@dataclass(frozen=True)
+class Command(DataClassDictMixin):
     """
     Command baseclass.
 
@@ -21,7 +25,7 @@ class Command(abc.ABC, DataClassDictMixin):
 
 
 @dataclass(frozen=True)
-class DomainEvent(abc.ABC, DataClassORJSONMixin):
+class DomainEvent(DataClassORJSONMixin):
     """
     Domain Event base class.
 

@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from result import Result
 
     from ez_cqrs.acid_exec import OpsRegistry
+    from ez_cqrs.components import UseCaseOutput
     from ez_cqrs.error import ExecutionError
 
 
@@ -30,7 +31,7 @@ class CommandHandler(abc.ABC, Generic[C, E]):
         command: C,
         ops_registry: OpsRegistry[Any],
         event_registry: list[E],
-    ) -> Result[Any, ExecutionError]:
+    ) -> Result[UseCaseOutput, ExecutionError]:
         """
         Consume and process commands.
 
