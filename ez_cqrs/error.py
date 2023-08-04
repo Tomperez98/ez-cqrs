@@ -49,4 +49,5 @@ class UnexpectedError(Exception):
 ExecutionError: TypeAlias = Union[
     DomainError,
     UnexpectedError,
+    DatabaseError,
 ]

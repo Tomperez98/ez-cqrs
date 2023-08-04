@@ -9,14 +9,14 @@ from result import Err, Ok
 
 from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import OUT, C, E
-from ez_cqrs.error import UnexpectedError
+from ez_cqrs.error import DatabaseError, UnexpectedError
 
 if TYPE_CHECKING:
     import pydantic
     from result import Result
 
     from ez_cqrs.acid_exec import ACID
-    from ez_cqrs.error import DatabaseError, DomainError, ExecutionError
+    from ez_cqrs.error import DomainError, ExecutionError
     from ez_cqrs.handler import CommandHandler, EventDispatcher
 
 T = TypeVar("T")
@@ -36,7 +36,7 @@ class EzCqrs(Generic[C, E, OUT]):
         max_transactions: int,
         app_database: ACID | None,
         event_registry: list[E],
-    ) -> Result[OUT, ExecutionError | pydantic.ValidationError | DatabaseError]:
+    ) -> Result[OUT, ExecutionError | pydantic.ValidationError]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -64,7 +64,7 @@ class EzCqrs(Generic[C, E, OUT]):
         execution_err: DomainError | None = None
         if not isinstance(execution_result_or_err, Ok):
             execution_error = execution_result_or_err.err()
-            if isinstance(execution_error, UnexpectedError):
+            if isinstance(execution_error, (UnexpectedError, DatabaseError)):
                 return Err(execution_error)
             execution_err = execution_error
 
