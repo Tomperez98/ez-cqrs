@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ez_cqrs"
-version = "2.3.0"
+version = "2.3.1"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -74,7 +74,6 @@ ban-relative-imports = "all"
 
 [tool.ruff.flake8-quotes]
 inline-quotes = "double"
-
 
 [tool.black]
 line-length = 88

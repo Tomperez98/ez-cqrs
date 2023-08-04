@@ -64,15 +64,12 @@ class EzCqrs(Generic[C, E, OUT]):
             return execution_result_or_err
 
         if app_database and max_transactions > 0:
-            if ops_registry.is_empty():
-                msg = "No transactions to commit"
-                raise RuntimeError(msg)
-
-            commited_or_err = app_database.commit_as_transaction(
-                ops_registry=ops_registry,
-            )
-            if not isinstance(commited_or_err, Ok):
-                return commited_or_err
+            if len(ops_registry.storage_snapshot()) > 0:
+                commited_or_err = app_database.commit_as_transaction(
+                    ops_registry=ops_registry,
+                )
+                if not isinstance(commited_or_err, Ok):
+                    return commited_or_err
 
             if not ops_registry.is_empty():
                 msg = "Ops registry didn't came empty after transactions commit."
