@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from result import Result
 
     from ez_cqrs.acid_exec import ACID
-    from ez_cqrs.error import ExecutionError
+    from ez_cqrs.error import DatabaseError, ExecutionError
     from ez_cqrs.handler import CommandHandler, EventDispatcher
 
 T = TypeVar("T")
@@ -60,9 +60,31 @@ class EzCqrs(Generic[C, E, OUT]):
                 event_registry=event_registry,
             ),
         )
+        commited_or_err = self._commit_existing_transactions(
+            max_transactions=max_transactions,
+            ops_registry=ops_registry,
+            app_database=app_database,
+        )
+        if not isinstance(commited_or_err, Ok):
+            return commited_or_err
+
         if not isinstance(execution_result_or_err, Ok):
             return execution_result_or_err
 
+        event_dispatch_tasks = (
+            self.event_dispatcher.dispatch(x) for x in event_registry
+        )
+
+        asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
+
+        return Ok(execution_result_or_err.unwrap())
+
+    def _commit_existing_transactions(
+        self,
+        max_transactions: int,
+        ops_registry: OpsRegistry[Any],
+        app_database: ACID | None,
+    ) -> Result[None, DatabaseError]:
         if app_database and max_transactions > 0:
             if ops_registry.storage_length() > 0:
                 commited_or_err = app_database.commit_as_transaction(
@@ -74,11 +96,4 @@ class EzCqrs(Generic[C, E, OUT]):
             if not ops_registry.is_empty():
                 msg = "Ops registry didn't came empty after transactions commit."
                 raise RuntimeError(msg)
-
-        event_dispatch_tasks = (
-            self.event_dispatcher.dispatch(x) for x in event_registry
-        )
-
-        asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
-
-        return Ok(execution_result_or_err.unwrap())
+        return Ok(None)
