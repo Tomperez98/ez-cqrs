@@ -5,17 +5,18 @@ import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, final
 
-from result import Ok
+from result import Err, Ok
 
 from ez_cqrs.acid_exec import OpsRegistry
 from ez_cqrs.components import OUT, C, E
+from ez_cqrs.error import UnexpectedError
 
 if TYPE_CHECKING:
     import pydantic
     from result import Result
 
     from ez_cqrs.acid_exec import ACID
-    from ez_cqrs.error import DatabaseError, ExecutionError
+    from ez_cqrs.error import DatabaseError, DomainError, ExecutionError
     from ez_cqrs.handler import CommandHandler, EventDispatcher
 
 T = TypeVar("T")
@@ -35,7 +36,7 @@ class EzCqrs(Generic[C, E, OUT]):
         max_transactions: int,
         app_database: ACID | None,
         event_registry: list[E],
-    ) -> Result[OUT, ExecutionError | pydantic.ValidationError]:
+    ) -> Result[OUT, ExecutionError | pydantic.ValidationError | DatabaseError]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -60,6 +61,13 @@ class EzCqrs(Generic[C, E, OUT]):
                 event_registry=event_registry,
             ),
         )
+        execution_err: DomainError | None = None
+        if not isinstance(execution_result_or_err, Ok):
+            execution_error = execution_result_or_err.err()
+            if isinstance(execution_error, UnexpectedError):
+                return Err(execution_error)
+            execution_err = execution_error
+
         commited_or_err = self._commit_existing_transactions(
             max_transactions=max_transactions,
             ops_registry=ops_registry,
@@ -68,14 +76,14 @@ class EzCqrs(Generic[C, E, OUT]):
         if not isinstance(commited_or_err, Ok):
             return commited_or_err
 
-        if not isinstance(execution_result_or_err, Ok):
-            return execution_result_or_err
-
         event_dispatch_tasks = (
             self.event_dispatcher.dispatch(x) for x in event_registry
         )
 
         asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
+
+        if execution_err:
+            return Err(execution_err)
 
         return Ok(execution_result_or_err.unwrap())
 
