@@ -32,7 +32,7 @@ class OpsRegistry(Generic[T]):
 
     def is_empty(self) -> bool:
         """Check `OpsRegistry` storage is empty."""
-        return len(self._storage) == 0
+        return self.storage_length() == 0
 
     def add(self, value: T) -> None:
         """Add new value to the storage registry."""

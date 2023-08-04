@@ -64,7 +64,7 @@ class EzCqrs(Generic[C, E, OUT]):
             return execution_result_or_err
 
         if app_database and max_transactions > 0:
-            if len(ops_registry.storage_snapshot()) > 0:
+            if ops_registry.storage_length() > 0:
                 commited_or_err = app_database.commit_as_transaction(
                     ops_registry=ops_registry,
                 )

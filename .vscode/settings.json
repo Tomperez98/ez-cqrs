@@ -22,10 +22,18 @@
     "python.analysis.inlayHints.functionReturnTypes": false,
     "python.analysis.inlayHints.variableTypes": false,
     "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.userFileIndexingLimit": -1,
+    "python.analysis.userFileIndexingLimit": 200,
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.analysis.diagnosticMode": "workspace",
-
-
+    "[toml]": {"editor.formatOnSave": true},
+    "json.format.enable": true,
+    "[json]": {
+        "editor.quickSuggestions": {
+            "strings": true
+        },
+        "editor.suggest.insertMode": "replace",
+        "editor.formatOnSave": true
+    },
+    "python.analysis.enablePytestSupport": false
 }
