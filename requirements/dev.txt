@@ -4,6 +4,10 @@
 #
 #    pip-compile --extra=dev --output-file=requirements/dev.txt pyproject.toml
 #
+--trusted-host pypi.python.org
+--trusted-host pypi.org
+--trusted-host files.pythonhosted.org
+
 annotated-types==0.5.0
     # via pydantic
 black==23.7.0
@@ -173,6 +177,7 @@ tomli==2.0.1
     #   black
     #   build
     #   coverage
+    #   ez_cqrs (pyproject.toml)
     #   mypy
     #   pip-tools
     #   pyproject-hooks

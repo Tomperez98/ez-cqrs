@@ -4,6 +4,10 @@
 #
 #    pip-compile --output-file=requirements/core.txt pyproject.toml
 #
+--trusted-host pypi.python.org
+--trusted-host pypi.org
+--trusted-host files.pythonhosted.org
+
 mashumaro[orjson]==3.7
     # via ez_cqrs (pyproject.toml)
 orjson==3.9.0
