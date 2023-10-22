@@ -14,7 +14,7 @@ classifiers = [
 authors = [
     { name = "Tomas Perez Alvarez", email = "tomasperezalvarez@gmail.com" },
 ]
-dependencies = ["mashumaro[orjson]", "result", "pydantic"]
+dependencies = ["result", "pydantic"]
 
 [project.optional-dependencies]
 dev = ["pyrgo>=0.3.0", "pytest-cov", "pytest-asyncio", "tomli"]
@@ -57,10 +57,7 @@ exclude = [
 "tests/*.py" = ["INP001", "S101", "D101", "D102"]
 
 [tool.ruff.flake8-type-checking]
-runtime-evaluated-base-classes = [
-    "pydantic.BaseModel",
-    "mashumaro.mixins.orjson.DataClassORJSONMixin",
-]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
 strict = true
 
 [tool.ruff.isort]
@@ -120,3 +117,6 @@ disallow_untyped_decorators = true
 disallow_untyped_calls = true
 disallow_untyped_defs = true
 explicit_package_bases = true
+
+[tool.pyrgo]
+extra-paths = ["scripts"]

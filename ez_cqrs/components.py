@@ -4,17 +4,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TypeVar
 
-from mashumaro import DataClassDictMixin
-from mashumaro.mixins.orjson import DataClassORJSONMixin
-
 
 @dataclass(frozen=True)
-class UseCaseOutput(DataClassDictMixin):
+class UseCaseOutput:
     """UseCase Output container."""
 
 
 @dataclass(frozen=True)
-class Command(DataClassDictMixin):
+class Command:
     """
     Command baseclass.
 
@@ -25,7 +22,7 @@ class Command(DataClassDictMixin):
 
 
 @dataclass(frozen=True)
-class DomainEvent(DataClassORJSONMixin):
+class DomainEvent:
     """
     Domain Event base class.
 
