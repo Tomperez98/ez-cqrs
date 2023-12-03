@@ -7,18 +7,18 @@ from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel, Field, ValidationError
 from result import Err, Ok
 
+from ez_cqrs import EzCqrs
 from ez_cqrs.components import Command, DomainEvent, UseCaseResponse
-from ez_cqrs.framework import EzCqrs
-from ez_cqrs.framework.testing import EzCQRSTester
+from ez_cqrs.testing import EzCQRSTester
 
 if TYPE_CHECKING:
     from typing import TypeAlias
 
     from result import Result
 
-    from ez_cqrs.acid_exec import OpsRegistry
-    from ez_cqrs.error import ExecutionError
-    from ez_cqrs.typing import T
+    from ez_cqrs._framework import StateChanges
+    from ez_cqrs._typing import T
+    from ez_cqrs.components import ExecutionError
 
 
 @dataclass(frozen=True)
@@ -72,7 +72,7 @@ class OpenAccount(Command[BankAccountEvent, BankAccountOutput]):
         return Ok()
 
     async def execute(
-        self, events: list[BankAccountEvent], state_changes: OpsRegistry[T]
+        self, events: list[BankAccountEvent], state_changes: StateChanges[T]
     ) -> Ok[BankAccountOutput] | Err[ExecutionError]:
         _ = state_changes
         events.append(
@@ -101,7 +101,7 @@ class DepositMoney(Command[BankAccountEvent, BankAccountOutput]):
         return Ok()
 
     async def execute(
-        self, events: list[BankAccountEvent], state_changes: OpsRegistry[T]
+        self, events: list[BankAccountEvent], state_changes: StateChanges[T]
     ) -> Ok[BankAccountOutput] | Err[ExecutionError]:
         _ = state_changes
         events.append(

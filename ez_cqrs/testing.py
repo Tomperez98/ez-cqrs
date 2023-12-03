@@ -5,16 +5,14 @@ from typing import TYPE_CHECKING, Generic, final
 
 from result import Ok
 
-from ez_cqrs.components import E, R
-from ez_cqrs.error import DomainError
-from ez_cqrs.typing import T
+from ez_cqrs._typing import T
+from ez_cqrs.components import DomainError, E, R
 
 if TYPE_CHECKING:
     from result import Result
 
-    from ez_cqrs.acid_exec import ACID
+    from ez_cqrs._framework import ACID, EzCqrs
     from ez_cqrs.components import Command, DomainEvent, UseCaseResponse
-    from ez_cqrs.framework import EzCqrs
 
 
 NO_COMMAND_ERROR = "There's not command setted."

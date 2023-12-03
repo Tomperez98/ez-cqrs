@@ -17,7 +17,7 @@ authors = [
 dependencies = ["result", "pydantic>=2.0.0"]
 
 [project.optional-dependencies]
-dev = ["pyrgo == 1.2.1", "pytest-cov", "pytest-asyncio"]
+dev = ["pyrgo", "pytest-cov", "pytest-asyncio", "pip-tools==7.3.0"]
 
 [project.urls]
 Documentation = "https://github.com/Tomperez98/ez-cqrs#readme"

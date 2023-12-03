@@ -66,8 +66,10 @@ pip-audit==2.6.0
     # via pyrgo
 pip-requirements-parser==32.0.1
     # via pip-audit
-pip-tools==7.1.0
-    # via pyrgo
+pip-tools==7.3.0
+    # via
+    #   ez_cqrs (pyproject.toml)
+    #   pyrgo
 pluggy==1.2.0
     # via pytest
 py-serializable==0.11.1
