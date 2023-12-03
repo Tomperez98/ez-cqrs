@@ -5,12 +5,13 @@ import abc
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, TypeAlias, TypeVar, final
 
+from ez_cqrs._typing import T
+
 if TYPE_CHECKING:
     from pydantic import ValidationError
     from result import Result
 
     from ez_cqrs._framework import StateChanges
-    from ez_cqrs._typing import T
 
 
 class DomainError(abc.ABC, Exception):
@@ -84,7 +85,7 @@ E = TypeVar("E", bound=DomainEvent)
 
 
 @dataclass(frozen=True)
-class Command(Generic[E, R], abc.ABC):
+class Command(Generic[E, R, T], abc.ABC):
     """
     Command baseclass.
 

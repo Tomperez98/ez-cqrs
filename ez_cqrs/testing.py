@@ -30,9 +30,9 @@ class EzCQRSTester(Generic[E, R, T]):
         self.framework = framework
         self.app_database = app_database
 
-        self.command: Command[E, R] | None = None
+        self.command: Command[E, R, T] | None = None
 
-    def with_command(self, command: Command[E, R]) -> None:
+    def with_command(self, command: Command[E, R, T]) -> None:
         """Set command to use for test execution."""
         if self.command is not None:
             raise RuntimeError(CLEAR_ERROR)

@@ -101,7 +101,7 @@ class EzCqrs(Generic[E, R, T]):
 
     async def run(
         self,
-        cmd: Command[E, R],
+        cmd: Command[E, R, T],
         max_transactions: int,
         app_database: ACID[T] | None,
     ) -> Result[tuple[R, list[E]], ExecutionError | pydantic.ValidationError]:
