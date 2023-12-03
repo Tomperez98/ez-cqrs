@@ -146,12 +146,12 @@ class DomainEvent(abc.ABC):
         """Define how to handle the event."""
 
 
-R_co = TypeVar("R_co", bound=UseCaseResponse, covariant=True)
-E_co = TypeVar("E_co", bound=DomainEvent, covariant=True)
+R = TypeVar("R", bound=UseCaseResponse, covariant=False)
+E = TypeVar("E", bound=DomainEvent, covariant=False)
 
 
 @dataclass(frozen=True)
-class Command(Generic[E_co, R_co, T], abc.ABC):
+class Command(Generic[E, R, T], abc.ABC):
     """
     Command baseclass.
 
@@ -167,5 +167,5 @@ class Command(Generic[E_co, R_co, T], abc.ABC):
     @abc.abstractmethod
     async def execute(
         self, state_changes: StateChanges[T]
-    ) -> Result[tuple[R_co, list[E_co]], ExecutionError]:
+    ) -> Result[tuple[R, list[E]], ExecutionError]:
         """Execute command."""

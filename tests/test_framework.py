@@ -2,23 +2,24 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
+import pytest
 from pydantic import BaseModel, Field, ValidationError
 from result import Err, Ok
 
 from ez_cqrs import EzCqrs
-from ez_cqrs._testing import EzCQRSTester
+from ez_cqrs._testing import EzCqrsTester
 from ez_cqrs._typing import T
 from ez_cqrs.components import (
     Command,
+    DomainError,
     DomainEvent,
     UseCaseResponse,
 )
 
 if TYPE_CHECKING:
     from result import Result
-    from typing_extensions import TypeAlias
 
     from ez_cqrs.components import (
         ExecutionError,
@@ -44,9 +45,6 @@ class MoneyDeposited(DomainEvent):
         ...
 
 
-BankAccountEvent: TypeAlias = Union[AccountOpened, MoneyDeposited]
-
-
 @dataclass(frozen=True)
 class OpenAccountOutput(UseCaseResponse):
     account_id: str
@@ -56,9 +54,6 @@ class OpenAccountOutput(UseCaseResponse):
 class DepositMoneyOutput(UseCaseResponse):
     account_id: str
     amount: int
-
-
-BankAccountOutput: TypeAlias = Union[OpenAccountOutput, DepositMoneyOutput]
 
 
 @dataclass(frozen=True)
@@ -93,6 +88,11 @@ class OpenAccount(Command[AccountOpened, OpenAccountOutput, T]):
         )
 
 
+class NegativeDepositAmountError(DomainError):
+    def __init__(self, amount: int) -> None:  # noqa: D107
+        super().__init__(f"Trying to deposit negative amount {amount}")
+
+
 @dataclass(frozen=True)
 class DepositMoney(Command[MoneyDeposited, DepositMoneyOutput, T]):
     account_id: str
@@ -100,7 +100,7 @@ class DepositMoney(Command[MoneyDeposited, DepositMoneyOutput, T]):
 
     def validate(self) -> Result[None, ValidationError]:
         class Schema(BaseModel):
-            amount: int = Field(gt=0)
+            amount: int
 
         try:
             Schema(amount=self.amount)
@@ -112,6 +112,8 @@ class DepositMoney(Command[MoneyDeposited, DepositMoneyOutput, T]):
         self, state_changes: StateChanges[T]
     ) -> Ok[tuple[DepositMoneyOutput, list[MoneyDeposited]]] | Err[ExecutionError]:
         _ = state_changes
+        if self.amount < 0:
+            return Err(NegativeDepositAmountError(amount=self.amount))
 
         return Ok(
             (
@@ -129,24 +131,59 @@ class DepositMoney(Command[MoneyDeposited, DepositMoneyOutput, T]):
         )
 
 
-async def test_execution_both_commands() -> None:
-    """Test both commands execution."""
-    framework_tester = EzCQRSTester[BankAccountEvent, BankAccountOutput, Any](
-        framework=EzCqrs[BankAccountEvent, BankAccountOutput, Any](),
-        app_database=None,
+async def test_open_account() -> None:
+    """Test open account use case."""
+    assert (
+        await EzCqrsTester[AccountOpened, OpenAccountOutput, Any](
+            framework=EzCqrs[OpenAccountOutput](),
+            app_database=None,
+        )
+        .with_command(OpenAccount(account_id="123", amount=12))
+        .expect(
+            max_transactions=0, expected_result=Ok(OpenAccountOutput(account_id="123"))
+        )
     )
-    framework_tester.with_command(command=OpenAccount(account_id="123", amount=12))
-    assert await framework_tester.expect(
-        max_transactions=0,
-        expected_result=Ok(
-            OpenAccountOutput(account_id="123"),
-        ),
+
+
+async def test_deposity_money() -> None:
+    """Test deposit money use case."""
+    assert (
+        await EzCqrsTester[MoneyDeposited, DepositMoneyOutput, Any](
+            framework=EzCqrs[DepositMoneyOutput](),
+            app_database=None,
+        )
+        .with_command(command=DepositMoney(account_id="123", amount=20))
+        .expect(
+            max_transactions=0,
+            expected_result=Ok(
+                DepositMoneyOutput(account_id="123", amount=20),
+            ),
+        )
     )
-    framework_tester.clear()
-    framework_tester.with_command(command=DepositMoney(account_id="123", amount=20))
-    assert await framework_tester.expect(
-        max_transactions=0,
-        expected_result=Ok(
-            DepositMoneyOutput(account_id="123", amount=20),
-        ),
+
+
+async def test_failed_deposity_money() -> None:
+    """Test deposit money use case."""
+    assert (
+        await EzCqrsTester[MoneyDeposited, DepositMoneyOutput, Any](
+            framework=EzCqrs[DepositMoneyOutput](),
+            app_database=None,
+        )
+        .with_command(command=DepositMoney(account_id="123", amount=-20))
+        .expect(
+            max_transactions=0,
+            expected_result=Err(NegativeDepositAmountError(amount=-20)),
+        )
     )
+
+
+async def test_without_command() -> None:  # noqa: D103
+    with pytest.raises(RuntimeError):
+        assert await EzCqrsTester[MoneyDeposited, DepositMoneyOutput, Any](
+            framework=EzCqrs[DepositMoneyOutput](), app_database=None
+        ).expect(
+            max_transactions=0,
+            expected_result=Ok(
+                DepositMoneyOutput(account_id="123", amount=20),
+            ),
+        )

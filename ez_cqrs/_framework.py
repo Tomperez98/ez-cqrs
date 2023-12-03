@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Generic, final
 from result import Err, Ok
 
 from ez_cqrs._typing import T
-from ez_cqrs.components import DatabaseError, E_co, R_co, StateChanges, UnexpectedError
+from ez_cqrs.components import DatabaseError, R, StateChanges, UnexpectedError
 
 if TYPE_CHECKING:
     import pydantic
@@ -18,21 +18,22 @@ if TYPE_CHECKING:
         ACID,
         Command,
         DomainError,
+        E,
         ExecutionError,
     )
 
 
 @final
 @dataclass(repr=True, frozen=True, eq=False)
-class EzCqrs(Generic[E_co, R_co, T]):
+class EzCqrs(Generic[R]):
     """EzCqrs framework."""
 
     async def run(
         self,
-        cmd: Command[E_co, R_co, T],
+        cmd: Command[E, R, T],
         max_transactions: int,
         app_database: ACID[T] | None,
-    ) -> Result[R_co, ExecutionError | pydantic.ValidationError]:
+    ) -> Result[R, ExecutionError | pydantic.ValidationError]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -49,12 +50,12 @@ class EzCqrs(Generic[E_co, R_co, T]):
             return validated_or_err
 
         execution_result_or_err = await cmd.execute(state_changes=state_changes)
-        execution_err: DomainError | None = None
+        domain_err: DomainError | None = None
         if not isinstance(execution_result_or_err, Ok):
             execution_error = execution_result_or_err.err()
             if isinstance(execution_error, (UnexpectedError, DatabaseError)):
                 return Err(execution_error)
-            execution_err = execution_error
+            domain_err = execution_error
 
         commited_or_err = self._commit_existing_transactions(
             max_transactions=max_transactions,
@@ -64,13 +65,13 @@ class EzCqrs(Generic[E_co, R_co, T]):
         if not isinstance(commited_or_err, Ok):
             return commited_or_err
 
+        if domain_err:
+            return Err(domain_err)
+
         execution_response, domain_events = execution_result_or_err.unwrap()
         event_dispatch_tasks = (event.publish() for event in domain_events)
 
         asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
-
-        if execution_err:
-            return Err(execution_err)
 
         return Ok(execution_response)
 
