@@ -12,10 +12,10 @@ from ez_cqrs import EzCqrs
 from ez_cqrs._testing import EzCqrsTester
 from ez_cqrs._typing import T
 from ez_cqrs.components import (
-    Command,
-    DomainError,
-    DomainEvent,
-    UseCaseResponse,
+    ICommand,
+    IDomainError,
+    IDomainEvent,
+    IUseCaseResponse,
 )
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class AccountOpened(DomainEvent):
+class AccountOpened(IDomainEvent):
     account_id: str
     amount: int
 
@@ -37,7 +37,7 @@ class AccountOpened(DomainEvent):
 
 
 @dataclass(frozen=True)
-class MoneyDeposited(DomainEvent):
+class MoneyDeposited(IDomainEvent):
     account_id: str
     amount: int
 
@@ -46,18 +46,18 @@ class MoneyDeposited(DomainEvent):
 
 
 @dataclass(frozen=True)
-class OpenAccountOutput(UseCaseResponse):
+class OpenAccountOutput(IUseCaseResponse):
     account_id: str
 
 
 @dataclass(frozen=True)
-class DepositMoneyOutput(UseCaseResponse):
+class DepositMoneyOutput(IUseCaseResponse):
     account_id: str
     amount: int
 
 
 @dataclass(frozen=True)
-class OpenAccount(Command[AccountOpened, OpenAccountOutput, T]):
+class OpenAccount(ICommand[AccountOpened, OpenAccountOutput, T]):
     account_id: str
     amount: int
 
@@ -88,13 +88,13 @@ class OpenAccount(Command[AccountOpened, OpenAccountOutput, T]):
         )
 
 
-class NegativeDepositAmountError(DomainError):
+class NegativeDepositAmountError(IDomainError):
     def __init__(self, amount: int) -> None:  # noqa: D107
         super().__init__(f"Trying to deposit negative amount {amount}")
 
 
 @dataclass(frozen=True)
-class DepositMoney(Command[MoneyDeposited, DepositMoneyOutput, T]):
+class DepositMoney(ICommand[MoneyDeposited, DepositMoneyOutput, T]):
     account_id: str
     amount: int
 

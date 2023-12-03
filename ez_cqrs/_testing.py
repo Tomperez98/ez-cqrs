@@ -6,14 +6,14 @@ from typing import TYPE_CHECKING, Generic, final
 from result import Err, Ok
 
 from ez_cqrs._typing import T
-from ez_cqrs.components import DomainError, E, R
+from ez_cqrs.components import E, IDomainError, R
 
 if TYPE_CHECKING:
     from result import Result
     from typing_extensions import Self
 
     from ez_cqrs import EzCqrs
-    from ez_cqrs.components import ACID, Command
+    from ez_cqrs.components import ACID, ICommand
 
 
 NO_COMMAND_ERROR = "There's not command setted."
@@ -28,9 +28,9 @@ class EzCqrsTester(Generic[E, R, T]):
         self.framework = framework
         self.app_database = app_database
 
-        self.command: Command[E, R, T] | None = None
+        self.command: ICommand[E, R, T] | None = None
 
-    def with_command(self, command: Command[E, R, T]) -> Self:
+    def with_command(self, command: ICommand[E, R, T]) -> Self:
         """Set command to use for test execution."""
         self.command = command
         return self
@@ -38,7 +38,7 @@ class EzCqrsTester(Generic[E, R, T]):
     async def expect(
         self,
         max_transactions: int,
-        expected_result: Result[R, DomainError],
+        expected_result: Result[R, IDomainError],
     ) -> bool:
         """Execute use case and expect a domain error."""
         if self.command is None:
@@ -51,7 +51,7 @@ class EzCqrsTester(Generic[E, R, T]):
         )
         if not isinstance(use_case_result, Ok):
             error = use_case_result.err()
-            if not isinstance(error, DomainError):
+            if not isinstance(error, IDomainError):
                 msg = f"Encounter error is {error}"
                 raise TypeError(msg)
 

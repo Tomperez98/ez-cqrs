@@ -82,7 +82,7 @@ class ACID(abc.ABC, Generic[T]):
         """
 
 
-class DomainError(abc.ABC, Exception):
+class IDomainError(abc.ABC, Exception):
     """
     Raised when a user violates a business rule.
 
@@ -115,24 +115,24 @@ class UnexpectedError(Exception):
         super().__init__(f"Unexpected error {unexpected_error}")
 
 
-ExecutionError: TypeAlias = Union[DomainError, UnexpectedError, DatabaseError]
+ExecutionError: TypeAlias = Union[IDomainError, UnexpectedError, DatabaseError]
 
 
 @dataclass(frozen=True)
-class UseCaseResponse:
+class IUseCaseResponse:
     """UseCase Output container."""
 
 
 @dataclass(frozen=True)
-class DomainEvent(abc.ABC):
+class IDomainEvent(abc.ABC):
     """
     Domain Event base class.
 
-    A `DomainEvent` represents any business change in the state of an `Aggregate`.
+    A `IDomainEvent` represents any business change in the state of an `Aggregate`.
     `DomainEvents` are inmutable, and when [event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html)
     is used they are the single source of truth.
 
-    The name of a `DomainEvent` should always be in the past tense, e.g.,
+    The name of a `IDomainEvent` should always be in the past tense, e.g.,
     - AdminPrivilegesGranted
     - EmailAddressChanged
     - DependencyAdded
@@ -146,14 +146,14 @@ class DomainEvent(abc.ABC):
         """Define how to handle the event."""
 
 
-R = TypeVar("R", bound=UseCaseResponse, covariant=False)
-E = TypeVar("E", bound=DomainEvent, covariant=False)
+R = TypeVar("R", bound=IUseCaseResponse, covariant=False)
+E = TypeVar("E", bound=IDomainEvent, covariant=False)
 
 
 @dataclass(frozen=True)
-class Command(Generic[E, R, T], abc.ABC):
+class ICommand(Generic[E, R, T], abc.ABC):
     """
-    Command baseclass.
+    ICommand baseclass.
 
     In order to make changes to our system we'll need commands. These
     are the simplest components of any CQRS system and consist of little more than

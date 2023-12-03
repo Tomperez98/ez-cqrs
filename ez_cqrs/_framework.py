@@ -16,10 +16,10 @@ if TYPE_CHECKING:
 
     from ez_cqrs.components import (
         ACID,
-        Command,
-        DomainError,
         E,
         ExecutionError,
+        ICommand,
+        IDomainError,
     )
 
 
@@ -30,7 +30,7 @@ class EzCqrs(Generic[R]):
 
     async def run(
         self,
-        cmd: Command[E, R, T],
+        cmd: ICommand[E, R, T],
         max_transactions: int,
         app_database: ACID[T] | None,
     ) -> Result[R, ExecutionError | pydantic.ValidationError]:
@@ -50,7 +50,7 @@ class EzCqrs(Generic[R]):
             return validated_or_err
 
         execution_result_or_err = await cmd.execute(state_changes=state_changes)
-        domain_err: DomainError | None = None
+        domain_err: IDomainError | None = None
         if not isinstance(execution_result_or_err, Ok):
             execution_error = execution_result_or_err.err()
             if isinstance(execution_error, (UnexpectedError, DatabaseError)):
