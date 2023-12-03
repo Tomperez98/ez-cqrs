@@ -8,16 +8,15 @@ from pydantic import BaseModel, Field, ValidationError
 from result import Err, Ok
 
 from ez_cqrs import EzCqrs
+from ez_cqrs._testing import EzCQRSTester
 from ez_cqrs._typing import T
 from ez_cqrs.components import Command, DomainEvent, UseCaseResponse
-from ez_cqrs.testing import EzCQRSTester
 
 if TYPE_CHECKING:
     from result import Result
     from typing_extensions import TypeAlias
 
-    from ez_cqrs._framework import StateChanges
-    from ez_cqrs.components import ExecutionError
+    from ez_cqrs.components import ExecutionError, StateChanges
 
 
 @dataclass(frozen=True)

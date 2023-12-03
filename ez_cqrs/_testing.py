@@ -11,8 +11,8 @@ from ez_cqrs.components import DomainError, E, R
 if TYPE_CHECKING:
     from result import Result
 
-    from ez_cqrs._framework import ACID, EzCqrs
-    from ez_cqrs.components import Command, DomainEvent, UseCaseResponse
+    from ez_cqrs import EzCqrs
+    from ez_cqrs.components import ACID, Command, DomainEvent, UseCaseResponse
 
 
 NO_COMMAND_ERROR = "There's not command setted."

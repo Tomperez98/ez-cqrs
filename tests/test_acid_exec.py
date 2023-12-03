@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from ez_cqrs._framework import StateChanges
+from ez_cqrs.components import StateChanges
 
 
 @pytest.mark.unit()
