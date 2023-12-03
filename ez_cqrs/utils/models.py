@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Dict, NewType
+from typing import Any, NewType
 
-DtoPayload = NewType("DtoPayload", Dict[str, Any])
+DtoPayload = NewType("DtoPayload", dict[str, Any])
 
 
 class Persistable(abc.ABC):

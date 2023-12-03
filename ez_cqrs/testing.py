@@ -5,34 +5,34 @@ from typing import TYPE_CHECKING, Generic, final
 
 from result import Ok
 
-from ez_cqrs.components import OUT, C, E
-from ez_cqrs.error import DomainError
+from ez_cqrs._typing import T
+from ez_cqrs.components import DomainError, E, R
 
 if TYPE_CHECKING:
     from result import Result
 
-    from ez_cqrs.acid_exec import ACID
-    from ez_cqrs.components import UseCaseOutput
-    from ez_cqrs.framework import EzCqrs
+    from ez_cqrs._framework import ACID, EzCqrs
+    from ez_cqrs.components import Command, DomainEvent, UseCaseResponse
 
 
 NO_COMMAND_ERROR = "There's not command setted."
 CLEAR_ERROR = "Command already set. run `clear()`"
-NO_EXECUTION_ERROR = "Run execute before checking results."
 
 
 @final
-class EzCQRSTester(Generic[C, E, OUT]):
+class EzCQRSTester(Generic[E, R, T]):
     """Testing framework for EzCRQS."""
 
-    def __init__(self, framework: EzCqrs[C, E, OUT], app_database: ACID | None) -> None:
+    def __init__(
+        self, framework: EzCqrs[E, R, T], app_database: ACID[T] | None
+    ) -> None:
         """Test framework for EzCRQS."""
         self.framework = framework
         self.app_database = app_database
 
-        self.command: C | None = None
+        self.command: Command[E, R, T] | None = None
 
-    def with_command(self, command: C) -> None:
+    def with_command(self, command: Command[E, R, T]) -> None:
         """Set command to use for test execution."""
         if self.command is not None:
             raise RuntimeError(CLEAR_ERROR)
@@ -47,19 +47,16 @@ class EzCQRSTester(Generic[C, E, OUT]):
     async def expect(
         self,
         max_transactions: int,
-        expected_result: Result[UseCaseOutput, DomainError],
-        expected_events: list[E],
+        expected_result: Result[tuple[UseCaseResponse, list[DomainEvent]], DomainError],
     ) -> bool:
         """Execute use case and expect a domain error."""
         if self.command is None:
             raise RuntimeError(NO_COMMAND_ERROR)
 
-        event_registry: list[E] = []
         use_case_result = await self.framework.run(
             cmd=self.command,
             max_transactions=max_transactions,
             app_database=self.app_database,
-            event_registry=event_registry,
         )
         if not isinstance(use_case_result, Ok):
             error = use_case_result.err()
@@ -68,5 +65,5 @@ class EzCQRSTester(Generic[C, E, OUT]):
                 raise TypeError(msg)
 
         return all(
-            [use_case_result == expected_result, event_registry == expected_events],
+            [use_case_result == expected_result],
         )
