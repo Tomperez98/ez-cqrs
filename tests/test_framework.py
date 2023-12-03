@@ -55,7 +55,7 @@ BankAccountOutput: TypeAlias = Union[OpenAccountOutput, DepositMoneyOutput]
 
 
 @dataclass(frozen=True)
-class OpenAccount(Command[BankAccountEvent, OpenAccountOutput, T]):
+class OpenAccount(Command[AccountOpened, OpenAccountOutput, T]):
     account_id: str
     amount: int
 
@@ -70,7 +70,7 @@ class OpenAccount(Command[BankAccountEvent, OpenAccountOutput, T]):
         return Ok()
 
     async def execute(
-        self, events: list[BankAccountEvent], state_changes: StateChanges[T]
+        self, events: list[AccountOpened], state_changes: StateChanges[T]
     ) -> Ok[OpenAccountOutput] | Err[ExecutionError]:
         _ = state_changes
         events.append(
@@ -84,7 +84,7 @@ class OpenAccount(Command[BankAccountEvent, OpenAccountOutput, T]):
 
 
 @dataclass(frozen=True)
-class DepositMoney(Command[BankAccountEvent, DepositMoneyOutput, T]):
+class DepositMoney(Command[MoneyDeposited, DepositMoneyOutput, T]):
     account_id: str
     amount: int
 
@@ -99,7 +99,7 @@ class DepositMoney(Command[BankAccountEvent, DepositMoneyOutput, T]):
         return Ok()
 
     async def execute(
-        self, events: list[BankAccountEvent], state_changes: StateChanges[T]
+        self, events: list[MoneyDeposited], state_changes: StateChanges[T]
     ) -> Ok[DepositMoneyOutput] | Err[ExecutionError]:
         _ = state_changes
         events.append(

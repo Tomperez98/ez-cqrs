@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Generic, final
 from result import Ok
 
 from ez_cqrs._typing import T
-from ez_cqrs.components import DomainError, E, R_co
+from ez_cqrs.components import DomainError, E_co, R_co
 
 if TYPE_CHECKING:
     from result import Result
@@ -20,19 +20,19 @@ CLEAR_ERROR = "Command already set. run `clear()`"
 
 
 @final
-class EzCQRSTester(Generic[E, R_co, T]):
+class EzCQRSTester(Generic[E_co, R_co, T]):
     """Testing framework for EzCRQS."""
 
     def __init__(
-        self, framework: EzCqrs[E, R_co, T], app_database: ACID[T] | None
+        self, framework: EzCqrs[E_co, R_co, T], app_database: ACID[T] | None
     ) -> None:
         """Test framework for EzCRQS."""
         self.framework = framework
         self.app_database = app_database
 
-        self.command: Command[E, R_co, T] | None = None
+        self.command: Command[E_co, R_co, T] | None = None
 
-    def with_command(self, command: Command[E, R_co, T]) -> None:
+    def with_command(self, command: Command[E_co, R_co, T]) -> None:
         """Set command to use for test execution."""
         if self.command is not None:
             raise RuntimeError(CLEAR_ERROR)
