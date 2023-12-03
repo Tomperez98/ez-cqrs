@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import abc
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Generic, TypeVar, final
+from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 if TYPE_CHECKING:
     from result import Result
@@ -54,7 +54,7 @@ class OpsRegistry(Generic[T]):
         return len(self._storage)
 
 
-class ACID(abc.ABC):
+class ACID(abc.ABC, Generic[T]):
     """
     Repository gives acces to the system database layer.
 
@@ -70,7 +70,7 @@ class ACID(abc.ABC):
     @abc.abstractmethod
     def commit_as_transaction(
         self,
-        ops_registry: OpsRegistry[Any],
+        ops_registry: OpsRegistry[T],
     ) -> Result[None, DatabaseError]:
         """
         Commit update operations stored in an `OpsRegistry`.

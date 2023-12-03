@@ -1,28 +1,29 @@
 """CQRS core components."""
 from __future__ import annotations
 
+import abc
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+if TYPE_CHECKING:
+    from pydantic import ValidationError
+    from result import Result
+
+    from ez_cqrs.acid_exec import OpsRegistry
+    from ez_cqrs.error import ExecutionError
+    from ez_cqrs.typing import T
 
 
 @dataclass(frozen=True)
-class UseCaseOutput:
+class UseCaseResponse:
     """UseCase Output container."""
 
 
-@dataclass(frozen=True)
-class Command:
-    """
-    Command baseclass.
-
-    In order to make changes to our system we'll need commands. These
-    are the simplest components of any CQRS system and consist of little more than
-    packaged data.
-    """
+R = TypeVar("R", bound=UseCaseResponse)
 
 
 @dataclass(frozen=True)
-class DomainEvent:
+class DomainEvent(abc.ABC):
     """
     Domain Event base class.
 
@@ -39,7 +40,30 @@ class DomainEvent:
     any important information.
     """
 
+    @abc.abstractmethod
+    async def publish(self) -> None:
+        """Define how to handle the event."""
 
-C = TypeVar("C", bound=Command)
+
 E = TypeVar("E", bound=DomainEvent)
-OUT = TypeVar("OUT", bound=UseCaseOutput)
+
+
+@dataclass(frozen=True)
+class Command(Generic[E, R], abc.ABC):
+    """
+    Command baseclass.
+
+    In order to make changes to our system we'll need commands. These
+    are the simplest components of any CQRS system and consist of little more than
+    packaged data.
+    """
+
+    @abc.abstractmethod
+    def validate(self) -> Result[None, ValidationError]:
+        """Validate command using a pydantic schema."""
+
+    @abc.abstractmethod
+    async def execute(
+        self, events: list[E], state_changes: OpsRegistry[T]
+    ) -> Result[R, ExecutionError]:
+        """Execute command."""
