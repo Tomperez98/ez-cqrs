@@ -19,15 +19,12 @@ if TYPE_CHECKING:
     from ez_cqrs.acid_exec import ACID
     from ez_cqrs.components import Command
     from ez_cqrs.error import DomainError, ExecutionError
-    from ez_cqrs.handler import CommandHandler
 
 
 @final
 @dataclass(repr=True, frozen=True, eq=False)
 class EzCqrs(Generic[E, R, T]):
     """EzCqrs framework."""
-
-    cmd_handler: CommandHandler[E, R]
 
     async def run(
         self,
@@ -46,17 +43,13 @@ class EzCqrs(Generic[E, R, T]):
 
         ops_registry = OpsRegistry[T](max_lenght=max_transactions)
 
-        validated_or_err = self.cmd_handler.validate(
-            command=cmd,
-        )
+        validated_or_err = cmd.validate()
         if not isinstance(validated_or_err, Ok):
             return validated_or_err
 
         domain_events: list[E] = []
-        execution_result_or_err = await self.cmd_handler.handle(
-            command=cmd,
-            ops_registry=ops_registry,
-            event_registry=domain_events,
+        execution_result_or_err = await cmd.execute(
+            events=domain_events, state_changes=ops_registry
         )
         execution_err: DomainError | None = None
         if not isinstance(execution_result_or_err, Ok):

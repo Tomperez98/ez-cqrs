@@ -10,7 +10,6 @@ from result import Err, Ok
 from ez_cqrs.components import Command, DomainEvent, UseCaseResponse
 from ez_cqrs.framework import EzCqrs
 from ez_cqrs.framework.testing import EzCQRSTester
-from ez_cqrs.handler import CommandHandler
 
 if TYPE_CHECKING:
     from typing import TypeAlias
@@ -122,9 +121,7 @@ class DepositMoney(Command[BankAccountEvent, BankAccountOutput]):
 async def test_execution_both_commands() -> None:
     """Test both commands execution."""
     framework_tester = EzCQRSTester[BankAccountEvent, BankAccountOutput, Any](
-        framework=EzCqrs[BankAccountEvent, BankAccountOutput, Any](
-            cmd_handler=CommandHandler[BankAccountEvent, BankAccountOutput](),
-        ),
+        framework=EzCqrs[BankAccountEvent, BankAccountOutput, Any](),
         app_database=None,
     )
     framework_tester.with_command(command=OpenAccount(account_id="123", amount=12))
