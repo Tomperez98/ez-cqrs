@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import abc
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Generic, TypeVar, Union, final
+from typing import TYPE_CHECKING, Generic, Union, final
+
+from typing_extensions import TypeVar
 
 from ez_cqrs._typing import T
 
@@ -121,9 +123,6 @@ class UseCaseResponse:
     """UseCase Output container."""
 
 
-R = TypeVar("R", bound=UseCaseResponse)
-
-
 @dataclass(frozen=True)
 class DomainEvent(abc.ABC):
     """
@@ -147,11 +146,12 @@ class DomainEvent(abc.ABC):
         """Define how to handle the event."""
 
 
+R_co = TypeVar("R_co", bound=UseCaseResponse, covariant=True)
 E = TypeVar("E", bound=DomainEvent)
 
 
 @dataclass(frozen=True)
-class Command(Generic[E, R, T], abc.ABC):
+class Command(Generic[E, R_co, T], abc.ABC):
     """
     Command baseclass.
 
@@ -167,5 +167,5 @@ class Command(Generic[E, R, T], abc.ABC):
     @abc.abstractmethod
     async def execute(
         self, events: list[E], state_changes: StateChanges[T]
-    ) -> Result[R, ExecutionError]:
+    ) -> Result[R_co, ExecutionError]:
         """Execute command."""

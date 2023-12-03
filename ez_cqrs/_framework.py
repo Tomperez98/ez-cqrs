@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Generic, final
 from result import Err, Ok
 
 from ez_cqrs._typing import T
-from ez_cqrs.components import DatabaseError, E, R, StateChanges, UnexpectedError
+from ez_cqrs.components import DatabaseError, E, R_co, StateChanges, UnexpectedError
 
 if TYPE_CHECKING:
     import pydantic
@@ -24,15 +24,15 @@ if TYPE_CHECKING:
 
 @final
 @dataclass(repr=True, frozen=True, eq=False)
-class EzCqrs(Generic[E, R, T]):
+class EzCqrs(Generic[E, R_co, T]):
     """EzCqrs framework."""
 
     async def run(
         self,
-        cmd: Command[E, R, T],
+        cmd: Command[E, R_co, T],
         max_transactions: int,
         app_database: ACID[T] | None,
-    ) -> Result[tuple[R, list[E]], ExecutionError | pydantic.ValidationError]:
+    ) -> Result[tuple[R_co, list[E]], ExecutionError | pydantic.ValidationError]:
         """
         Validate and execute command, then dispatch command events.
 
