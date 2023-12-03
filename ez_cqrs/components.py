@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import abc
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Generic, TypeAlias, TypeVar, final
+from typing import TYPE_CHECKING, Generic, TypeVar, Union, final
 
 from ez_cqrs._typing import T
 
 if TYPE_CHECKING:
     from pydantic import ValidationError
     from result import Result
+    from typing_extensions import TypeAlias
 
     from ez_cqrs._framework import StateChanges
 
@@ -47,7 +48,7 @@ class UnexpectedError(Exception):
         super().__init__(f"Unexpected error {unexpected_error}")
 
 
-ExecutionError: TypeAlias = DomainError | UnexpectedError | DatabaseError
+ExecutionError: TypeAlias = Union[DomainError, UnexpectedError, DatabaseError]
 
 
 @dataclass(frozen=True)

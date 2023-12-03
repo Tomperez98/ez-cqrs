@@ -127,7 +127,7 @@ class EzCqrs(Generic[E, R, T]):
         execution_err: DomainError | None = None
         if not isinstance(execution_result_or_err, Ok):
             execution_error = execution_result_or_err.err()
-            if isinstance(execution_error, UnexpectedError | DatabaseError):
+            if isinstance(execution_error, (UnexpectedError, DatabaseError)):
                 return Err(execution_error)
             execution_err = execution_error
 

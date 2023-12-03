@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Union
 
 from pydantic import BaseModel, Field, ValidationError
 from result import Err, Ok
@@ -13,9 +13,8 @@ from ez_cqrs.components import Command, DomainEvent, UseCaseResponse
 from ez_cqrs.testing import EzCQRSTester
 
 if TYPE_CHECKING:
-    from typing import TypeAlias
-
     from result import Result
+    from typing_extensions import TypeAlias
 
     from ez_cqrs._framework import StateChanges
     from ez_cqrs.components import ExecutionError
@@ -39,7 +38,7 @@ class MoneyDeposited(DomainEvent):
         ...
 
 
-BankAccountEvent: TypeAlias = AccountOpened | MoneyDeposited
+BankAccountEvent: TypeAlias = Union[AccountOpened, MoneyDeposited]
 
 
 @dataclass(frozen=True)
@@ -53,7 +52,7 @@ class DepositMoneyOutput(UseCaseResponse):
     amount: int
 
 
-BankAccountOutput: TypeAlias = OpenAccountOutput | DepositMoneyOutput
+BankAccountOutput: TypeAlias = Union[OpenAccountOutput, DepositMoneyOutput]
 
 
 @dataclass(frozen=True)
