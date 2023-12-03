@@ -10,13 +10,20 @@ from result import Err, Ok
 from ez_cqrs import EzCqrs
 from ez_cqrs._testing import EzCQRSTester
 from ez_cqrs._typing import T
-from ez_cqrs.components import Command, DomainEvent, UseCaseResponse
+from ez_cqrs.components import (
+    Command,
+    DomainEvent,
+    UseCaseResponse,
+)
 
 if TYPE_CHECKING:
     from result import Result
     from typing_extensions import TypeAlias
 
-    from ez_cqrs.components import ExecutionError, StateChanges
+    from ez_cqrs.components import (
+        ExecutionError,
+        StateChanges,
+    )
 
 
 @dataclass(frozen=True)
@@ -70,17 +77,20 @@ class OpenAccount(Command[AccountOpened, OpenAccountOutput, T]):
         return Ok()
 
     async def execute(
-        self, events: list[AccountOpened], state_changes: StateChanges[T]
-    ) -> Ok[OpenAccountOutput] | Err[ExecutionError]:
+        self, state_changes: StateChanges[T]
+    ) -> Ok[tuple[OpenAccountOutput, list[AccountOpened]]] | Err[ExecutionError]:
         _ = state_changes
-        events.append(
-            AccountOpened(
-                account_id=self.account_id,
-                amount=self.amount,
-            ),
+        return Ok(
+            (
+                OpenAccountOutput(account_id=self.account_id),
+                [
+                    AccountOpened(
+                        account_id=self.account_id,
+                        amount=self.amount,
+                    ),
+                ],
+            )
         )
-
-        return Ok(OpenAccountOutput(account_id=self.account_id))
 
 
 @dataclass(frozen=True)
@@ -99,20 +109,23 @@ class DepositMoney(Command[MoneyDeposited, DepositMoneyOutput, T]):
         return Ok()
 
     async def execute(
-        self, events: list[MoneyDeposited], state_changes: StateChanges[T]
-    ) -> Ok[DepositMoneyOutput] | Err[ExecutionError]:
+        self, state_changes: StateChanges[T]
+    ) -> Ok[tuple[DepositMoneyOutput, list[MoneyDeposited]]] | Err[ExecutionError]:
         _ = state_changes
-        events.append(
-            MoneyDeposited(
-                account_id=self.account_id,
-                amount=self.amount,
-            ),
-        )
+
         return Ok(
-            DepositMoneyOutput(
-                account_id=self.account_id,
-                amount=self.amount,
-            ),
+            (
+                DepositMoneyOutput(
+                    account_id=self.account_id,
+                    amount=self.amount,
+                ),
+                [
+                    MoneyDeposited(
+                        account_id=self.account_id,
+                        amount=self.amount,
+                    )
+                ],
+            )
         )
 
 
@@ -126,10 +139,7 @@ async def test_execution_both_commands() -> None:
     assert await framework_tester.expect(
         max_transactions=0,
         expected_result=Ok(
-            (
-                OpenAccountOutput(account_id="123"),
-                [AccountOpened(account_id="123", amount=12)],
-            )
+            OpenAccountOutput(account_id="123"),
         ),
     )
     framework_tester.clear()
@@ -137,9 +147,6 @@ async def test_execution_both_commands() -> None:
     assert await framework_tester.expect(
         max_transactions=0,
         expected_result=Ok(
-            (
-                DepositMoneyOutput(account_id="123", amount=20),
-                [MoneyDeposited(account_id="123", amount=20)],
-            )
+            DepositMoneyOutput(account_id="123", amount=20),
         ),
     )

@@ -166,6 +166,6 @@ class Command(Generic[E_co, R_co, T], abc.ABC):
 
     @abc.abstractmethod
     async def execute(
-        self, events: list[E_co], state_changes: StateChanges[T]
-    ) -> Result[R_co, ExecutionError]:
+        self, state_changes: StateChanges[T]
+    ) -> Result[tuple[R_co, list[E_co]], ExecutionError]:
         """Execute command."""

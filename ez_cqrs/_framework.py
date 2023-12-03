@@ -32,7 +32,7 @@ class EzCqrs(Generic[E_co, R_co, T]):
         cmd: Command[E_co, R_co, T],
         max_transactions: int,
         app_database: ACID[T] | None,
-    ) -> Result[tuple[R_co, list[E_co]], ExecutionError | pydantic.ValidationError]:
+    ) -> Result[R_co, ExecutionError | pydantic.ValidationError]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -48,10 +48,7 @@ class EzCqrs(Generic[E_co, R_co, T]):
         if not isinstance(validated_or_err, Ok):
             return validated_or_err
 
-        domain_events: list[E_co] = []
-        execution_result_or_err = await cmd.execute(
-            events=domain_events, state_changes=state_changes
-        )
+        execution_result_or_err = await cmd.execute(state_changes=state_changes)
         execution_err: DomainError | None = None
         if not isinstance(execution_result_or_err, Ok):
             execution_error = execution_result_or_err.err()
@@ -67,6 +64,7 @@ class EzCqrs(Generic[E_co, R_co, T]):
         if not isinstance(commited_or_err, Ok):
             return commited_or_err
 
+        execution_response, domain_events = execution_result_or_err.unwrap()
         event_dispatch_tasks = (event.publish() for event in domain_events)
 
         asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
@@ -74,7 +72,7 @@ class EzCqrs(Generic[E_co, R_co, T]):
         if execution_err:
             return Err(execution_err)
 
-        return Ok((execution_result_or_err.unwrap(), domain_events))
+        return Ok(execution_response)
 
     def _commit_existing_transactions(
         self,
