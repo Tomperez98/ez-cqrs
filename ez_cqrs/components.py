@@ -82,7 +82,7 @@ class ACID(abc.ABC, Generic[T]):
         """
 
 
-class IDomainError(abc.ABC, Exception):
+class DomainError(Exception):
     """
     Raised when a user violates a business rule.
 
@@ -115,7 +115,7 @@ class UnexpectedError(Exception):
         super().__init__(f"Unexpected error {unexpected_error}")
 
 
-ExecutionError: TypeAlias = Union[IDomainError, UnexpectedError, DatabaseError]
+ExecutionError: TypeAlias = Union[DomainError, UnexpectedError, DatabaseError]
 
 
 @dataclass(frozen=True)

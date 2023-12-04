@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Generic, final
 from result import Err, Ok
 
 from ez_cqrs._typing import T
-from ez_cqrs.components import E, IDomainError, R
+from ez_cqrs.components import DomainError, E, R
 
 if TYPE_CHECKING:
     from result import Result
@@ -38,7 +38,7 @@ class EzCqrsTester(Generic[E, R, T]):
     async def expect(
         self,
         max_transactions: int,
-        expected_result: Result[R, IDomainError],
+        expected_result: Result[R, DomainError],
     ) -> bool:
         """Execute use case and expect a domain error."""
         if self.command is None:
@@ -51,7 +51,7 @@ class EzCqrsTester(Generic[E, R, T]):
         )
         if not isinstance(use_case_result, Ok):
             error = use_case_result.err()
-            if not isinstance(error, IDomainError):
+            if not isinstance(error, DomainError):
                 msg = f"Encounter error is {error}"
                 raise TypeError(msg)
 

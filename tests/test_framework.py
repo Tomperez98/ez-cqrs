@@ -12,8 +12,8 @@ from ez_cqrs import EzCqrs
 from ez_cqrs._testing import EzCqrsTester
 from ez_cqrs._typing import T
 from ez_cqrs.components import (
+    DomainError,
     ICommand,
-    IDomainError,
     IDomainEvent,
     IUseCaseResponse,
 )
@@ -88,7 +88,7 @@ class OpenAccount(ICommand[AccountOpened, OpenAccountOutput, T]):
         )
 
 
-class NegativeDepositAmountError(IDomainError):
+class NegativeDepositAmountError(DomainError):
     def __init__(self, amount: int) -> None:  # noqa: D107
         super().__init__(f"Trying to deposit negative amount {amount}")
 

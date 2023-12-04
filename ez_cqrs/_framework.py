@@ -16,10 +16,10 @@ if TYPE_CHECKING:
 
     from ez_cqrs.components import (
         ACID,
+        DomainError,
         E,
         ExecutionError,
         ICommand,
-        IDomainError,
     )
 
 
@@ -50,7 +50,7 @@ class EzCqrs(Generic[R]):
             return validated_or_err
 
         execution_result_or_err = await cmd.execute(state_changes=state_changes)
-        domain_err: IDomainError | None = None
+        domain_err: DomainError | None = None
         if not isinstance(execution_result_or_err, Ok):
             execution_error = execution_result_or_err.err()
             if isinstance(execution_error, (UnexpectedError, DatabaseError)):
