@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Generic, final
 from result import Err, Ok
 
 from ez_cqrs._typing import T
-from ez_cqrs.components import DatabaseError, R, StateChanges, UnexpectedError
+from ez_cqrs.components import R, StateChanges
 
 if TYPE_CHECKING:
     import pydantic
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from ez_cqrs.components import (
         ACID,
-        DomainError,
+        DatabaseError,
         E,
         ExecutionError,
         ICommand,
@@ -50,12 +50,10 @@ class EzCqrs(Generic[R]):
             return validated_or_err
 
         execution_result_or_err = await cmd.execute(state_changes=state_changes)
-        domain_err: DomainError | None = None
+
         if not isinstance(execution_result_or_err, Ok):
             execution_error = execution_result_or_err.err()
-            if isinstance(execution_error, (UnexpectedError, DatabaseError)):
-                return Err(execution_error)
-            domain_err = execution_error
+            return Err(execution_error)
 
         commited_or_err = self._commit_existing_transactions(
             max_transactions=max_transactions,
@@ -64,9 +62,6 @@ class EzCqrs(Generic[R]):
         )
         if not isinstance(commited_or_err, Ok):
             return commited_or_err
-
-        if domain_err:
-            return Err(domain_err)
 
         execution_response, domain_events = execution_result_or_err.unwrap()
         event_dispatch_tasks = (event.publish() for event in domain_events)
