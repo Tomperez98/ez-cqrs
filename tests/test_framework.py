@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field, ValidationError
 from result import Err, Ok
 
 from ez_cqrs import EzCqrs
-from ez_cqrs.testing import EzCqrsTester
 from ez_cqrs._typing import T
 from ez_cqrs.components import (
     DomainError,
@@ -17,6 +16,7 @@ from ez_cqrs.components import (
     IDomainEvent,
     IUseCaseResponse,
 )
+from ez_cqrs.testing import EzCqrsTester
 
 if TYPE_CHECKING:
     from result import Result
