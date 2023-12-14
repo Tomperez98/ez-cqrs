@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, ValidationError
 from result import Err, Ok
 
 from ez_cqrs import EzCqrs
-from ez_cqrs._testing import EzCqrsTester
+from ez_cqrs.testing import EzCqrsTester
 from ez_cqrs._typing import T
 from ez_cqrs.components import (
     DomainError,
