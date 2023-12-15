@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import pytest
-from pydantic import BaseModel, Field, ValidationError
 from result import Err, Ok
 
 from ez_cqrs import EzCqrs
@@ -19,7 +18,6 @@ from ez_cqrs.components import (
 from ez_cqrs.testing import EzCqrsTester
 
 if TYPE_CHECKING:
-    from result import Result
 
     from ez_cqrs.components import (
         ExecutionError,
@@ -61,16 +59,6 @@ class OpenAccount(ICommand[AccountOpened, OpenAccountOutput, T]):
     account_id: str
     amount: int
 
-    def validate(self) -> Result[None, ValidationError]:
-        class Schema(BaseModel):
-            amount: int = Field(gt=0)
-
-        try:
-            Schema(amount=self.amount)
-        except ValidationError as e:
-            return Err(e)
-        return Ok()
-
     async def execute(
         self, state_changes: StateChanges[T]
     ) -> Ok[tuple[OpenAccountOutput, list[AccountOpened]]] | Err[ExecutionError]:
@@ -97,16 +85,6 @@ class NegativeDepositAmountError(DomainError):
 class DepositMoney(ICommand[MoneyDeposited, DepositMoneyOutput, T]):
     account_id: str
     amount: int
-
-    def validate(self) -> Result[None, ValidationError]:
-        class Schema(BaseModel):
-            amount: int
-
-        try:
-            Schema(amount=self.amount)
-        except ValidationError as e:
-            return Err(e)
-        return Ok()
 
     async def execute(
         self, state_changes: StateChanges[T]

@@ -4,16 +4,7 @@
 #
 #    pip-compile --output-file=requirements/core.txt pyproject.toml
 #
-annotated-types==0.6.0
-    # via pydantic
-pydantic==2.4.2
-    # via ez_cqrs (pyproject.toml)
-pydantic-core==2.10.1
-    # via pydantic
 result==0.10.0
     # via ez_cqrs (pyproject.toml)
 typing-extensions==4.6.2
-    # via
-    #   pydantic
-    #   pydantic-core
-    #   result
+    # via result

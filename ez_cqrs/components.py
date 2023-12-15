@@ -10,7 +10,6 @@ from typing_extensions import TypeVar
 from ez_cqrs._typing import T
 
 if TYPE_CHECKING:
-    from pydantic import ValidationError
     from result import Result
     from typing_extensions import TypeAlias
 
@@ -159,10 +158,6 @@ class ICommand(Generic[E, R, T], abc.ABC):
     are the simplest components of any CQRS system and consist of little more than
     packaged data.
     """
-
-    @abc.abstractmethod
-    def validate(self) -> Result[None, ValidationError]:
-        """Validate command using a pydantic schema."""
 
     @abc.abstractmethod
     async def execute(

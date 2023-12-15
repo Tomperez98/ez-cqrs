@@ -4,8 +4,6 @@
 #
 #    pip-compile --extra=dev --output-file=requirements/dev.txt pyproject.toml
 #
-annotated-types==0.5.0
-    # via pydantic
 build==0.10.0
     # via
     #   pip-tools
@@ -82,10 +80,6 @@ pluggy==1.2.0
     # via pytest
 py-serializable==0.11.1
     # via cyclonedx-python-lib
-pydantic==2.0.3
-    # via ez_cqrs (pyproject.toml)
-pydantic-core==2.3.0
-    # via pydantic
 pygments==2.15.1
     # via
     #   pdoc
@@ -137,8 +131,6 @@ tomli==2.0.1
 typing-extensions==4.7.1
     # via
     #   mypy
-    #   pydantic
-    #   pydantic-core
     #   result
 urllib3==2.0.4
     # via requests

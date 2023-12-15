@@ -11,7 +11,6 @@ from ez_cqrs._typing import T
 from ez_cqrs.components import R, StateChanges
 
 if TYPE_CHECKING:
-    import pydantic
     from result import Result
 
     from ez_cqrs.components import (
@@ -33,7 +32,7 @@ class EzCqrs(Generic[R]):
         cmd: ICommand[E, R, T],
         max_transactions: int,
         app_database: ACID[T] | None,
-    ) -> Result[R, ExecutionError | pydantic.ValidationError]:
+    ) -> Result[R, ExecutionError]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -44,10 +43,6 @@ class EzCqrs(Generic[R]):
             raise RuntimeError(msg)
 
         state_changes = StateChanges[T](max_lenght=max_transactions)
-
-        validated_or_err = cmd.validate()
-        if not isinstance(validated_or_err, Ok):
-            return validated_or_err
 
         execution_result_or_err = await cmd.execute(state_changes=state_changes)
 
