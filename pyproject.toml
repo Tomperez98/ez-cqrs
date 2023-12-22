@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ez_cqrs"
-version = "5.0.0"
+version = "5.1.0"
 readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [
@@ -14,7 +14,7 @@ classifiers = [
 authors = [
     { name = "Tomas Perez Alvarez", email = "tomasperezalvarez@gmail.com" },
 ]
-dependencies = ["result"]
+dependencies = ["result < 1"]
 
 [project.optional-dependencies]
 dev = ["pyrgo >= 2", "pytest-cov", "pytest-asyncio", "pip-tools==7.3.0"]
@@ -25,7 +25,7 @@ Issues = "https://github.com/Tomperez98/ez-cqrs/issues"
 Source = "https://github.com/Tomperez98/ez-cqrs"
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 ignore = ["ANN101", "D203", "D212", "COM812", "ISC001"]
 select = ["ALL"]
 fix = false
@@ -54,7 +54,7 @@ exclude = [
 [tool.ruff.per-file-ignores]
 "scripts/*.py" = ["INP001"]
 "__init__.py" = ["D104"]
-"tests/*.py" = ["INP001", "S101", "D101", "D102"]
+"tests/*.py" = ["INP001", "S101", "D101", "D102", "D103"]
 
 [tool.ruff.flake8-type-checking]
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
@@ -72,10 +72,6 @@ ban-relative-imports = "all"
 [tool.ruff.flake8-quotes]
 inline-quotes = "double"
 
-[tool.black]
-line-length = 88
-include = '\.pyi?$'
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 xfail_strict = true
@@ -89,6 +85,7 @@ addopts = [
 ]
 markers = ["integration: mark integration tests.", "unit: mark unittest."]
 asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.coverage.report]
 precision = 1

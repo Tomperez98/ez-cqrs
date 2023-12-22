@@ -17,12 +17,13 @@
     },
     "python.analysis.autoImportCompletions": true,
     "python.analysis.extraCommitChars": false,
-    "python.analysis.inlayHints.callArgumentNames": false,
+    "python.analysis.inlayHints.callArgumentNames": "off",
     "python.analysis.inlayHints.pytestParameters": false,
-    "python.analysis.inlayHints.functionReturnTypes": false,
+    "python.analysis.inlayHints.functionReturnTypes": true,
     "python.analysis.inlayHints.variableTypes": false,
+    "python.analysis.autoFormatStrings": true,
     "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.userFileIndexingLimit": 200,
+    "python.analysis.userFileIndexingLimit": -1,
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.analysis.diagnosticMode": "workspace",
@@ -37,7 +38,7 @@
         "editor.suggest.insertMode": "replace",
         "editor.formatOnSave": true
     },
-    "python.analysis.enablePytestSupport": false,
+    "python.analysis.enablePytestSupport": true,
     "yaml.schemas": {
         "https://squidfunk.github.io/mkdocs-material/schema.json": "mkdocs.yml"
     },
@@ -47,5 +48,7 @@
         "tag:yaml.org,2002:python/name:materialx.emoji.to_svg",
         "tag:yaml.org,2002:python/name:materialx.emoji.twemoji",
         "tag:yaml.org,2002:python/name:pymdownx.superfences.fence_code_format"
-    ]
+    ],
+    "editor.formatOnSave": true,
+    "python.analysis.addImport.exactMatchOnly": true,
 }

@@ -2,13 +2,17 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Generic, final
 
-from result import Err, Ok
+from result import Ok
 
 from ez_cqrs._typing import T
-from ez_cqrs.components import R, StateChanges
+from ez_cqrs.components import (
+    E,
+    R,
+    StateChanges,
+)
 
 if TYPE_CHECKING:
     from result import Result
@@ -16,16 +20,17 @@ if TYPE_CHECKING:
     from ez_cqrs.components import (
         ACID,
         DatabaseError,
-        E,
         ExecutionError,
         ICommand,
     )
 
 
 @final
-@dataclass(repr=True, frozen=True, eq=False)
-class EzCqrs(Generic[R]):
+@dataclass(repr=True, frozen=False, eq=False)
+class EzCqrs(Generic[R, E]):
     """EzCqrs framework."""
+
+    _published_events: list[E] = field(init=False, default_factory=list)
 
     async def run(
         self,
@@ -47,8 +52,7 @@ class EzCqrs(Generic[R]):
         execution_result_or_err = await cmd.execute(state_changes=state_changes)
 
         if not isinstance(execution_result_or_err, Ok):
-            execution_error = execution_result_or_err.err()
-            return Err(execution_error)
+            return execution_result_or_err
 
         commited_or_err = self._commit_existing_transactions(
             max_transactions=max_transactions,
@@ -59,11 +63,16 @@ class EzCqrs(Generic[R]):
             return commited_or_err
 
         execution_response, domain_events = execution_result_or_err.unwrap()
-        event_dispatch_tasks = (event.publish() for event in domain_events)
 
-        asyncio.gather(*event_dispatch_tasks, return_exceptions=False)
+        asyncio.gather(*(event.publish() for event in domain_events), return_exceptions=False)
+
+        self._published_events.extend(domain_events)
 
         return Ok(execution_response)
+
+    def published_events(self) -> list[E]:
+        """Get the list of recorded domain events."""
+        return self._published_events
 
     def _commit_existing_transactions(
         self,
