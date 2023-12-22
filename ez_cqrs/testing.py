@@ -19,28 +19,19 @@ if TYPE_CHECKING:
 class EzCqrsTester(Generic[E, R, T]):
     """Testing framework for EzCRQS."""
 
-    def __init__(
+    async def run(
         self,
-        app_database: ACID[T] | None,
         cmd: ICommand[E, R, T],
+        app_database: ACID[T] | None,
         max_transactions: int,
-    ) -> None:
-        """Test framework for EzCRQS."""
-        self.app_database = app_database
-        self.cmd = cmd
-        self.max_transactions = max_transactions
-
-    async def run(self, expected_events: list[E]) -> Result[R, DomainError]:
+    ) -> Result[tuple[R, list[E]], DomainError]:
         """Execute use case and expect a domain error."""
         framework = EzCqrs[R, E]()
         use_case_result = await framework.run(
-            cmd=self.cmd,
-            app_database=self.app_database,
-            max_transactions=self.max_transactions,
+            cmd=cmd,
+            app_database=app_database,
+            max_transactions=max_transactions,
         )
-        if expected_events != framework.published_events():
-            msg = "Expected events and recorded events does not match."
-            raise RuntimeError(msg)
 
         if not isinstance(use_case_result, Ok):
             error = use_case_result.err()
@@ -49,4 +40,4 @@ class EzCqrsTester(Generic[E, R, T]):
                 raise TypeError(msg)
             return Err(error)
 
-        return use_case_result
+        return Ok((use_case_result.unwrap(), framework.published_events()))

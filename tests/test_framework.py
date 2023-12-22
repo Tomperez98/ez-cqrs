@@ -108,36 +108,38 @@ class DepositMoney(ICommand[MoneyDeposited, DepositMoneyResponse, T]):
 
 async def test_open_account() -> None:
     """Test open account use case."""
-    use_case_result = await EzCqrsTester[AccountOpened, OpenAccountResponse, str](
+    use_case_result = await EzCqrsTester[AccountOpened, OpenAccountResponse, str]().run(
         cmd=OpenAccount(account_id="123", amount=12),
         max_transactions=0,
         app_database=None,
-    ).run(
-        expected_events=[
-            AccountOpened(
-                account_id="123",
-                amount=12,
-            )
-        ]
     )
     assert isinstance(use_case_result, Ok)
+    _, events = use_case_result.unwrap()
+    assert events == [
+        AccountOpened(
+            account_id="123",
+            amount=12,
+        )
+    ]
 
 
 async def test_deposity_money() -> None:
     """Test deposit money use case."""
-    use_case_result = await EzCqrsTester[MoneyDeposited, DepositMoneyResponse, str](
+    use_case_result = await EzCqrsTester[MoneyDeposited, DepositMoneyResponse, str]().run(
         cmd=DepositMoney(account_id="123", amount=20),
         max_transactions=0,
         app_database=None,
-    ).run(expected_events=[MoneyDeposited(account_id="123", amount=20)])
+    )
     assert isinstance(use_case_result, Ok)
+    _, events = use_case_result.unwrap()
+    assert events == [MoneyDeposited(account_id="123", amount=20)]
 
 
 async def test_failed_deposity_money() -> None:
     """Test deposit money use case."""
-    use_case_result = await EzCqrsTester[MoneyDeposited, DepositMoneyResponse, str](
+    use_case_result = await EzCqrsTester[MoneyDeposited, DepositMoneyResponse, str]().run(
         cmd=DepositMoney(account_id="123", amount=-20),
         max_transactions=0,
         app_database=None,
-    ).run(expected_events=[])
+    )
     assert isinstance(use_case_result, Err)
