@@ -117,9 +117,13 @@ class UnexpectedError(Exception):
 ExecutionError: TypeAlias = Union[DomainError, UnexpectedError, DatabaseError]
 
 
-@dataclass(frozen=True)
-class IUseCaseResponse:
-    """UseCase Output container."""
+@dataclass(frozen=False)
+class IResponse(abc.ABC):
+    """Response container."""
+
+    @abc.abstractmethod
+    def format_data_for_view(self) -> None:
+        """Format response data for view display."""
 
 
 @dataclass(frozen=True)
@@ -145,7 +149,7 @@ class IDomainEvent(abc.ABC):
         """Define how to handle the event."""
 
 
-R = TypeVar("R", bound=IUseCaseResponse, covariant=False)
+R = TypeVar("R", bound=IResponse, covariant=False)
 E = TypeVar("E", bound=IDomainEvent, covariant=False)
 
 

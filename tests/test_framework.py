@@ -11,7 +11,7 @@ from ez_cqrs.components import (
     DomainError,
     ICommand,
     IDomainEvent,
-    IUseCaseResponse,
+    IResponse,
 )
 from ez_cqrs.testing import EzCqrsTester
 
@@ -40,15 +40,21 @@ class MoneyDeposited(IDomainEvent):
         ...
 
 
-@dataclass(frozen=True)
-class OpenAccountResponse(IUseCaseResponse):
+@dataclass(frozen=False)
+class OpenAccountResponse(IResponse):
     account_id: str
 
+    def format_data_for_view(self) -> None:
+        ...
 
-@dataclass(frozen=True)
-class DepositMoneyResponse(IUseCaseResponse):
+
+@dataclass(frozen=False)
+class DepositMoneyResponse(IResponse):
     account_id: str
     amount: int
+
+    def format_data_for_view(self) -> None:
+        ...
 
 
 @dataclass(frozen=True)
