@@ -40,21 +40,15 @@ class MoneyDeposited(IDomainEvent):
         ...
 
 
-@dataclass(frozen=False)
+@dataclass(frozen=True)
 class OpenAccountResponse(IResponse):
     account_id: str
 
-    def format_data_for_view(self) -> None:
-        ...
 
-
-@dataclass(frozen=False)
+@dataclass(frozen=True)
 class DepositMoneyResponse(IResponse):
     account_id: str
     amount: int
-
-    def format_data_for_view(self) -> None:
-        ...
 
 
 @dataclass(frozen=True)

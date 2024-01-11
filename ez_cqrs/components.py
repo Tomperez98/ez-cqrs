@@ -117,13 +117,9 @@ class UnexpectedError(Exception):
 ExecutionError: TypeAlias = Union[DomainError, UnexpectedError, DatabaseError]
 
 
-@dataclass(frozen=False)
-class IResponse(abc.ABC):
+@dataclass(frozen=True)
+class IResponse:
     """Response container."""
-
-    @abc.abstractmethod
-    def format_data_for_view(self) -> None:
-        """Format response data for view display."""
 
 
 @dataclass(frozen=True)
