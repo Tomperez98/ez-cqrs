@@ -26,11 +26,13 @@ class EzCqrsTester(Generic[E, R, T]):
         max_transactions: int,
     ) -> Result[tuple[R, list[E]], DomainError]:
         """Execute use case and expect a domain error."""
-        framework = EzCqrs[R, E]()
+        framework = EzCqrs[R]()
+        published_events: list[E] = []
         use_case_result = await framework.run(
             cmd=cmd,
             app_database=app_database,
             max_transactions=max_transactions,
+            events=published_events,
         )
 
         if not isinstance(use_case_result, Ok):
@@ -40,4 +42,4 @@ class EzCqrsTester(Generic[E, R, T]):
                 raise TypeError(msg)
             return Err(error)
 
-        return Ok((use_case_result.unwrap(), framework.published_events()))
+        return Ok((use_case_result.unwrap(), published_events))

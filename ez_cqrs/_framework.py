@@ -2,17 +2,13 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, final
 
 from result import Ok
 
 from ez_cqrs._typing import T
-from ez_cqrs.components import (
-    E,
-    R,
-    StateChanges,
-)
+from ez_cqrs.components import R, StateChanges
 
 if TYPE_CHECKING:
     from result import Result
@@ -20,6 +16,7 @@ if TYPE_CHECKING:
     from ez_cqrs.components import (
         ACID,
         DatabaseError,
+        E,
         ExecutionError,
         ICommand,
     )
@@ -27,16 +24,15 @@ if TYPE_CHECKING:
 
 @final
 @dataclass(repr=True, frozen=False, eq=False)
-class EzCqrs(Generic[R, E]):
+class EzCqrs(Generic[R]):
     """EzCqrs framework."""
-
-    _published_events: list[E] = field(init=False, default_factory=list)
 
     async def run(
         self,
         cmd: ICommand[E, R, T],
         max_transactions: int,
         app_database: ACID[T] | None,
+        events: list[E],
     ) -> Result[R, ExecutionError]:
         """
         Validate and execute command, then dispatch command events.
@@ -49,11 +45,7 @@ class EzCqrs(Generic[R, E]):
 
         state_changes = StateChanges[T](max_lenght=max_transactions)
 
-        use_case_events: list[E] = []
-
-        execution_result_or_err = await cmd.execute(
-            state_changes=state_changes, events=use_case_events
-        )
+        execution_result_or_err = await cmd.execute(state_changes=state_changes, events=events)
 
         if not isinstance(execution_result_or_err, Ok):
             return execution_result_or_err
@@ -68,15 +60,9 @@ class EzCqrs(Generic[R, E]):
 
         execution_response = execution_result_or_err.unwrap()
 
-        asyncio.gather(*(event.publish() for event in use_case_events), return_exceptions=False)
-
-        self._published_events.extend(use_case_events)
+        asyncio.gather(*(event.publish() for event in events), return_exceptions=False)
 
         return Ok(execution_response)
-
-    def published_events(self) -> list[E]:
-        """Get the list of recorded domain events."""
-        return self._published_events
 
     def _commit_existing_transactions(
         self,
