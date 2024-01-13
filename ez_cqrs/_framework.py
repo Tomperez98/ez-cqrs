@@ -49,7 +49,11 @@ class EzCqrs(Generic[R, E]):
 
         state_changes = StateChanges[T](max_lenght=max_transactions)
 
-        execution_result_or_err = await cmd.execute(state_changes=state_changes)
+        use_case_events: list[E] = []
+
+        execution_result_or_err = await cmd.execute(
+            state_changes=state_changes, events=use_case_events
+        )
 
         if not isinstance(execution_result_or_err, Ok):
             return execution_result_or_err
@@ -62,11 +66,11 @@ class EzCqrs(Generic[R, E]):
         if not isinstance(commited_or_err, Ok):
             return commited_or_err
 
-        execution_response, domain_events = execution_result_or_err.unwrap()
+        execution_response = execution_result_or_err.unwrap()
 
-        asyncio.gather(*(event.publish() for event in domain_events), return_exceptions=False)
+        asyncio.gather(*(event.publish() for event in use_case_events), return_exceptions=False)
 
-        self._published_events.extend(domain_events)
+        self._published_events.extend(use_case_events)
 
         return Ok(execution_response)
 

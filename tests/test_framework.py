@@ -57,20 +57,17 @@ class OpenAccount(ICommand[AccountOpened, OpenAccountResponse, T]):
     amount: int
 
     async def execute(
-        self, state_changes: StateChanges[T]
-    ) -> Ok[tuple[OpenAccountResponse, list[AccountOpened]]] | Err[ExecutionError]:
-        _ = state_changes
-        return Ok(
-            (
-                OpenAccountResponse(account_id=self.account_id),
-                [
-                    AccountOpened(
-                        account_id=self.account_id,
-                        amount=self.amount,
-                    ),
-                ],
+        self,
+        state_changes: StateChanges[T],  # noqa: ARG002
+        events: list[AccountOpened],
+    ) -> Ok[OpenAccountResponse] | Err[ExecutionError]:
+        events.append(
+            AccountOpened(
+                account_id=self.account_id,
+                amount=self.amount,
             )
         )
+        return Ok(OpenAccountResponse(account_id=self.account_id))
 
 
 class NegativeDepositAmountError(DomainError):
@@ -84,26 +81,15 @@ class DepositMoney(ICommand[MoneyDeposited, DepositMoneyResponse, T]):
     amount: int
 
     async def execute(
-        self, state_changes: StateChanges[T]
-    ) -> Ok[tuple[DepositMoneyResponse, list[MoneyDeposited]]] | Err[ExecutionError]:
-        _ = state_changes
+        self,
+        state_changes: StateChanges[T],  # noqa: ARG002
+        events: list[MoneyDeposited],
+    ) -> Ok[DepositMoneyResponse] | Err[ExecutionError]:
         if self.amount < 0:
             return Err(NegativeDepositAmountError(amount=self.amount))
 
-        return Ok(
-            (
-                DepositMoneyResponse(
-                    account_id=self.account_id,
-                    amount=self.amount,
-                ),
-                [
-                    MoneyDeposited(
-                        account_id=self.account_id,
-                        amount=self.amount,
-                    )
-                ],
-            )
-        )
+        events.append(MoneyDeposited(account_id=self.account_id, amount=self.amount))
+        return Ok(DepositMoneyResponse(account_id=self.account_id, amount=self.amount))
 
 
 async def test_open_account() -> None:

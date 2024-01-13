@@ -161,6 +161,8 @@ class ICommand(Generic[E, R, T], abc.ABC):
 
     @abc.abstractmethod
     async def execute(
-        self, state_changes: StateChanges[T]
-    ) -> Result[tuple[R, list[E]], ExecutionError]:
+        self,
+        state_changes: StateChanges[T],
+        events: list[E],
+    ) -> Result[R, ExecutionError]:
         """Execute command."""
