@@ -91,6 +91,28 @@ class DomainError(Exception):
     """
 
 
+@final
+class UnexpectedError(Exception):
+    """
+    Raised when an unexpected error was encountered.
+
+    A technical error was encountered teht prevented the command from being applied to
+    the aggregate. In general the accompanying message should be logged for
+    investigation rather than returned to the user.
+    """
+
+    def __init__(self, unexpected_error: Exception) -> None:  # noqa: D107
+        super().__init__(f"Unexpected error {unexpected_error}")
+
+
+@final
+class TransactionExecutionError(Exception):
+    """Error raised when the transaction execution fails."""
+
+    def __init__(self, error: Exception) -> None:  # noqa: D107
+        super().__init__(f"Failure while executing the transaction. Error: {error}")
+
+
 @dataclass(frozen=True)
 class BaseResponse:
     """Response container."""

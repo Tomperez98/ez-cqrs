@@ -9,9 +9,10 @@ from result import Err, Ok
 
 from ez_cqrs._typing import T
 from ez_cqrs.components import (
-    DomainError,
     R,
     StateChanges,
+    TransactionExecutionError,
+    UnexpectedError,
 )
 
 if TYPE_CHECKING:
@@ -19,31 +20,10 @@ if TYPE_CHECKING:
 
     from ez_cqrs.components import (
         ACID,
+        DomainError,
         E,
         ICommand,
     )
-
-
-@final
-class UnexpectedError(Exception):
-    """
-    Raised when an unexpected error was encountered.
-
-    A technical error was encountered teht prevented the command from being applied to
-    the aggregate. In general the accompanying message should be logged for
-    investigation rather than returned to the user.
-    """
-
-    def __init__(self, unexpected_error: Exception) -> None:
-        super().__init__(f"Unexpected error {unexpected_error}")
-
-
-@final
-class TransactionExecutionError(DomainError):
-    """Error raised when the transaction execution fails."""
-
-    def __init__(self, error: Exception) -> None:
-        super().__init__(f"Failure while executing the transaction. Error: {error}")
 
 
 @final
@@ -57,7 +37,7 @@ class EzCqrs(Generic[R]):
         max_transactions: int,
         app_database: ACID[T] | None,
         events: list[E],
-    ) -> Result[R, DomainError | UnexpectedError]:
+    ) -> Result[R, DomainError | UnexpectedError | TransactionExecutionError]:
         """
         Validate and execute command, then dispatch command events.
 
