@@ -8,16 +8,15 @@ from result import Err, Ok
 
 from ez_cqrs._typing import T
 from ez_cqrs.components import (
+    BaseResponse,
     DomainError,
     ICommand,
     IDomainEvent,
-    IResponse,
 )
 from ez_cqrs.testing import EzCqrsTester
 
 if TYPE_CHECKING:
     from ez_cqrs.components import (
-        ExecutionError,
         StateChanges,
     )
 
@@ -41,12 +40,12 @@ class MoneyDeposited(IDomainEvent):
 
 
 @dataclass(frozen=True)
-class OpenAccountResponse(IResponse):
+class OpenAccountResponse(BaseResponse):
     account_id: str
 
 
 @dataclass(frozen=True)
-class DepositMoneyResponse(IResponse):
+class DepositMoneyResponse(BaseResponse):
     account_id: str
     amount: int
 
@@ -60,7 +59,7 @@ class OpenAccount(ICommand[AccountOpened, OpenAccountResponse, T]):
         self,
         state_changes: StateChanges[T],  # noqa: ARG002
         events: list[AccountOpened],
-    ) -> Ok[OpenAccountResponse] | Err[ExecutionError]:
+    ) -> Ok[OpenAccountResponse] | Err[DomainError]:
         events.append(
             AccountOpened(
                 account_id=self.account_id,
@@ -84,7 +83,7 @@ class DepositMoney(ICommand[MoneyDeposited, DepositMoneyResponse, T]):
         self,
         state_changes: StateChanges[T],  # noqa: ARG002
         events: list[MoneyDeposited],
-    ) -> Ok[DepositMoneyResponse] | Err[ExecutionError]:
+    ) -> Ok[DepositMoneyResponse] | Err[DomainError]:
         if self.amount < 0:
             return Err(NegativeDepositAmountError(amount=self.amount))
 

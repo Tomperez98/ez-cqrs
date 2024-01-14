@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import abc
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Generic, Union, final
+from typing import TYPE_CHECKING, Generic, final
 
 from typing_extensions import TypeVar
 
@@ -11,7 +11,6 @@ from ez_cqrs._typing import T
 
 if TYPE_CHECKING:
     from result import Result
-    from typing_extensions import TypeAlias
 
 
 @final
@@ -71,7 +70,7 @@ class ACID(abc.ABC, Generic[T]):
     def commit_as_transaction(
         self,
         ops_registry: StateChanges[T],
-    ) -> Result[None, DatabaseError]:
+    ) -> None:
         """
         Commit update operations stored in an `StateChanges`.
 
@@ -92,33 +91,8 @@ class DomainError(Exception):
     """
 
 
-@final
-class DatabaseError(Exception):
-    """Raised whwne that's an error interacting with system's database."""
-
-    def __init__(self, database_error: Exception) -> None:  # noqa: D107
-        super().__init__(f"An error ocurred with database {database_error}")
-
-
-@final
-class UnexpectedError(Exception):
-    """
-    Raised when an unexpected error was encountered.
-
-    A technical error was encountered teht prevented the command from being applied to
-    the aggregate. In general the accompanying message should be logged for
-    investigation rather than returned to the user.
-    """
-
-    def __init__(self, unexpected_error: Exception) -> None:  # noqa: D107
-        super().__init__(f"Unexpected error {unexpected_error}")
-
-
-ExecutionError: TypeAlias = Union[DomainError, UnexpectedError, DatabaseError]
-
-
 @dataclass(frozen=True)
-class IResponse:
+class BaseResponse:
     """Response container."""
 
 
@@ -145,7 +119,7 @@ class IDomainEvent(abc.ABC):
         """Define how to handle the event."""
 
 
-R = TypeVar("R", bound=IResponse, covariant=False)
+R = TypeVar("R", bound=BaseResponse, covariant=False)
 E = TypeVar("E", bound=IDomainEvent, covariant=False)
 
 
@@ -164,5 +138,5 @@ class ICommand(Generic[E, R, T], abc.ABC):
         self,
         state_changes: StateChanges[T],
         events: list[E],
-    ) -> Result[R, ExecutionError]:
+    ) -> Result[R, DomainError]:
         """Execute command."""
