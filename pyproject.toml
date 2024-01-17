@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ez_cqrs"
-version = "6.1.2"
+version = "6.1.3"
 readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [
@@ -14,7 +14,7 @@ classifiers = [
 authors = [
     { name = "Tomas Perez Alvarez", email = "tomasperezalvarez@gmail.com" },
 ]
-dependencies = ["result < 1"]
+dependencies = ["result < 1", "loguru < 1"]
 
 [project.optional-dependencies]
 dev = ["pyrgo >= 2", "pytest-cov", "pytest-asyncio", "pip-tools==7.3.0"]

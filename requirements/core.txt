@@ -4,6 +4,8 @@
 #
 #    pip-compile --output-file=requirements/core.txt pyproject.toml
 #
+loguru==0.7.2
+    # via ez_cqrs (pyproject.toml)
 result==0.15.0
     # via ez_cqrs (pyproject.toml)
 typing-extensions==4.9.0

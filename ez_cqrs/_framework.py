@@ -37,7 +37,7 @@ class EzCqrs(Generic[R]):
         max_transactions: int,
         app_database: ACID[T] | None,
         events: list[E],
-    ) -> Result[R, DomainError | UnexpectedError | TransactionExecutionError]:
+    ) -> Result[R, DomainError | TransactionExecutionError]:
         """
         Validate and execute command, then dispatch command events.
 
@@ -51,7 +51,7 @@ class EzCqrs(Generic[R]):
         try:
             execution_result_or_err = await cmd.execute(state_changes=state_changes, events=events)
         except Exception as e:  # noqa: BLE001
-            return Err(UnexpectedError(unexpected_error=e))
+            raise UnexpectedError(e) from e
 
         if app_database is not None:
             commited_or_err = self._commit_existing_transactions(

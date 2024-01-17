@@ -46,6 +46,8 @@ jinja2==3.1.2
     # via pdoc
 license-expression==30.2.0
     # via cyclonedx-python-lib
+loguru==0.7.2
+    # via ez_cqrs (pyproject.toml)
 markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.3
