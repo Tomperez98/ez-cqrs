@@ -11,8 +11,6 @@ from ez_cqrs._typing import T
 from ez_cqrs.components import (
     R,
     StateChanges,
-    TransactionExecutionError,
-    UnexpectedError,
 )
 
 if TYPE_CHECKING:
@@ -48,10 +46,7 @@ class EzCqrs(Generic[R]):
             raise RuntimeError(msg)
 
         state_changes = StateChanges[T](max_lenght=max_transactions)
-        try:
-            execution_result_or_err = await cmd.execute(state_changes=state_changes, events=events)
-        except Exception as e:  # noqa: BLE001
-            raise UnexpectedError(e) from e
+        execution_result_or_err = await cmd.execute(state_changes=state_changes, events=events)
 
         if app_database is not None:
             self._commit_existing_transactions(
@@ -72,12 +67,9 @@ class EzCqrs(Generic[R]):
         app_database: ACID[T],
     ) -> None:
         if state_changes.storage_length() > 0:
-            try:
-                app_database.commit_as_transaction(
-                    ops_registry=state_changes,
-                )
-            except Exception as e:  # noqa: BLE001
-                raise TransactionExecutionError(e) from e
+            app_database.commit_as_transaction(
+                ops_registry=state_changes,
+            )
 
         if not state_changes.is_empty():
             msg = "Ops registry didn't came empty after transactions commit."
